@@ -2,16 +2,35 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const connectDB = require('./config/database');
+const { connectOpenSearch } = require('./config/opensearch');
+const userService = require('./services/userService');
+const sequenceService = require('./services/sequenceService');
 
 // Load env vars
 dotenv.config();
 
-// Connect to database
-connectDB();
+// Connect to OpenSearch and initialize indices
+connectOpenSearch().then(async client => {
+  if (client) {
+    console.log('OpenSearch client initialized');
+
+    try {
+      // Initialize indices
+      await userService.initIndex();
+      console.log('Users index initialized');
+
+      await sequenceService.initIndex();
+      console.log('Sequences index initialized');
+    } catch (error) {
+      console.error('Error initializing indices:', error.message);
+    }
+  }
+});
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const sequenceRoutes = require('./routes/sequenceRoutes');
 
 const app = express();
 
@@ -26,6 +45,8 @@ app.use(cors());
 
 // Mount routers
 app.use('/api/auth', authRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/sequences', sequenceRoutes);
 
 // Home route
 app.get('/', (req, res) => {

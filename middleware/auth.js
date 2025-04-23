@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const userService = require('../services/userService');
 
 // Protect routes
 exports.protect = async (req, res, next) => {
@@ -25,7 +25,20 @@ exports.protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = await User.findById(decoded.id);
+    // Get user from OpenSearch
+    const user = await userService.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'User not found' });
+    }
+
+    // Add user info to request
+    req.user = {
+      id: decoded.id,
+      name: user.name,
+      email: user.email
+    };
+
     next();
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
