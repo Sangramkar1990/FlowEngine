@@ -1,5 +1,5 @@
 {
-  "name": "flowengine",
+  "name": "Infinite sequence",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -9,9 +9,9 @@
     "create-indices": "node scripts/createIndices.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "sangram.gaurav.kar@gmail.com",
   "license": "ISC",
-  "description": "FlowEngine - A secure authentication system built with Express and OpenSearch",
+  "description": "Infinite sequence - A secure authentication system built with Express and OpenSearch",
   "dependencies": {
     "@opensearch-project/opensearch": "^3.5.1",
     "bcryptjs": "^3.0.2",
@@ -19,7 +19,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "flowengine": "file:",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.1",
     "razorpay": "^2.9.6",

@@ -5,7 +5,7 @@ const userService = require('../services/userService');
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, dateOfBirth, rank, userType, organizationName } = req.body;
 
     // Check if user already exists
     const userExists = await userService.findByEmail(email);
@@ -18,6 +18,10 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
+      dateOfBirth,
+      rank,
+      userType,
+      organizationName
     });
 
     sendTokenResponse(user.id, 201, res);

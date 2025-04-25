@@ -16,6 +16,10 @@ class UserService {
         name: { type: 'text' },
         email: { type: 'keyword' },
         password: { type: 'keyword' },
+        dateOfBirth: { type: 'date' },
+        rank: { type: 'keyword' },
+        userType: { type: 'keyword' },
+        organizationName: { type: 'text' },
         createdAt: { type: 'date' }
       }
     };
@@ -63,16 +67,20 @@ class UserService {
       name: userData.name,
       email: userData.email,
       password: hashedPassword,
+      dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth).toISOString() : undefined,
+      rank: userData.rank ? userData.rank.toLowerCase() : undefined,
+      userType: userData.userType,
+      organizationName: userData.userType === 'organization' ? userData.organizationName : undefined,
       createdAt: new Date().toISOString()
     };
 
     const result = await searchService.indexDocument(this.indexName, user);
-    
+
     // Return user without password
     const { password, ...userWithoutPassword } = user;
-    return { 
-      ...userWithoutPassword, 
-      id: result._id 
+    return {
+      ...userWithoutPassword,
+      id: result._id
     };
   }
 
