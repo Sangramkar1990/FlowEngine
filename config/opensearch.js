@@ -1,16 +1,10 @@
 const { Client } = require('@opensearch-project/opensearch');
+
 require('dotenv').config();
 
 const createOpenSearchClient = () => {
   const client = new Client({
-    node: process.env.OPENSEARCH_NODE || 'https://localhost:9200',
-    ssl: {
-      rejectUnauthorized: false // Set to true in production with proper certificates
-    },
-    auth: {
-      username: process.env.OPENSEARCH_USERNAME || 'admin',
-      password: process.env.OPENSEARCH_PASSWORD || 'admin'
-    }
+    node: "http://localhost:9200",
   });
 
   return client;
