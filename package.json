@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "sangram.gaurav.kar@gmail.com",
   "license": "ISC",
-  "description": "Infinite sequence - A secure authentication system built with Express and OpenSearch",
+  "description": "Infinite sequence ",
   "dependencies": {
     "@opensearch-project/opensearch": "^3.5.1",
     "bcryptjs": "^3.0.2",
