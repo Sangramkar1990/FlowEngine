@@ -64,6 +64,15 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to FlowEngine API' });
 });
 
+app.get('/check-cors', (req, res) => {
+  res.json({
+      message: 'CORS is enabled',
+      allowedOrigins: req.headers.origin || 'No origin provided',
+      methods: 'GET, POST, PUT, DELETE',
+      credentials: 'true or false (depending on your setup)'
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
