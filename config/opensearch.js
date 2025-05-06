@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const createOpenSearchClient = () => {
   const client = new Client({
-    node: "http://localhost:9200",
+    node: "http://opensearch:9200",
   });
 
   return client;

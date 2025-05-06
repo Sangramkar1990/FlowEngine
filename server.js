@@ -41,17 +41,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Enable CORS with credentials and explicit origin
-const allowedOrigins = ['http://localhost:5173'];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true // Allow cookies and authorization headers
+  origin: 'http://localhost:3000', // Replace '*' with your frontend URL
+  credentials: true
 }));
 
 // Mount routers

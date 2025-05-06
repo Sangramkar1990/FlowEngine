@@ -1,0 +1,32 @@
+#########################################
+# Standard OpenSearch settings
+#########################################
+cluster.name: my-cluster
+node.name: my-node
+network.host: 0.0.0.0
+http.port: 9200
+
+#########################################
+# OpenSearch Security plugin settings
+#########################################
+discovery.type: single-node
+
+# Example security config
+plugins.security.disabled: true
+
+plugins.security.ssl_only: false
+# Or if you want to configure SSL, add the full section you posted.
+plugins.security.nodes_dn:
+  - "CN=*.example.com, OU=SSL, O=Test, L=Test, C=DE"
+  - "CN=node.other.com, OU=SSL, O=Test, L=Test, C=DE"
+
+plugins.security.nodes_dn_dynamic_config_enabled: false
+
+plugins.security.authcz.admin_dn:
+  - "CN=kirk,OU=client,O=client,l=tEst, C=De"
+
+plugins.security.roles_mapping_resolution: MAPPING_ONLY
+
+plugins.security.audit.type: internal_opensearch
+
+bootstrap.memory_lock: true
