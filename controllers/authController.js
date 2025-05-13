@@ -23,6 +23,10 @@ exports.register = async (req, res) => {
       userType,
       organizationName
     });
+// Simulating user type check
+if (userType === "organization") {
+  return res.json({ redirectTo: "create-organization", userId: user.id });
+}
 
     sendTokenResponse(user.id, 201, res);
   } catch (error) {
@@ -56,6 +60,7 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
+    
 
     sendTokenResponse(user.id, 200, res);
   } catch (error) {

@@ -3,7 +3,7 @@
  */
 const validateRegistration = (req, res, next) => {
   // name, email, password, dateOfBirth, rank, userType, if userType = organization,organizationName
-   const { name, email, password, dateOfBirth, rank, userType, organizationName } = req.body;
+   const { name, email, password, dateOfBirth, rank, userType, } = req.body;
    const errors = [];
  
    // Validate name (string)
@@ -61,10 +61,7 @@ const validateRegistration = (req, res, next) => {
      errors.push('User type must be either "individual" or "organization"');
    }
  
-   // Validate organization name if user type is organization
-   if (userType === 'organization' && (!organizationName || typeof organizationName !== 'string' || organizationName.trim() === '')) {
-     errors.push('Organization name is required for organization accounts');
-   }
+ 
  
    // Return errors if any
    if (errors.length > 0) {
