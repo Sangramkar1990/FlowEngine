@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const { connectOpenSearch } = require('./config/opensearch');
 const userService = require('./services/userService');
 const sequenceService = require('./services/sequenceService');
+const organizationRoutes = require('./routes/organizationRoutes');
 
 // Load env vars
 dotenv.config();
@@ -50,6 +51,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/sequences', sequenceRoutes);
+app.use('/api/organization', organizationRoutes);
 
 // Home route
 app.get('/', (req, res) => {

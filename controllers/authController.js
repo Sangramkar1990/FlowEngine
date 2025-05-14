@@ -1,4 +1,6 @@
 const userService = require('../services/userService');
+const organizationService = require('../services/organizationService');
+const inviteListService = require('../services/inviteListService');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -139,4 +141,91 @@ const sendTokenResponse = (userId, statusCode, res) => {
       success: true,
       token,
     });
+};
+
+// @desc    Create organization and invite users
+// @route   POST /api/organization/create
+// @access  Private (should be protected in routes)
+exports.createOrganization = async (req, res) => {
+  try {
+    const { organizationName, emails, userId } = req.body;
+
+    // Validate input
+    if (!organizationName || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Organization name and userId are required.'
+      });
+    }
+
+    // Split emails into array and trim whitespace
+    const emailList = emails ? emails.split(',').map(email => email.trim()).filter(email => email) : [];
+
+    // 1. Create the organization
+    const organization = await organizationService.create({
+      organizationName,
+      userId // This userId is the owner
+    });
+
+    if (!organization || !organization.id) {
+      throw new Error('Failed to create organization.');
+    }
+
+    // 2. Update the user (owner) with the organization_id
+    await userService.updateUserWithOrganization(userId, organization.id);
+
+    // 3. Create the invite list if emails are provided
+    let invitedEmailsList;
+    if (emailList.length > 0) {
+      invitedEmailsList = await inviteListService.create(organization.id, emailList);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Organization created successfully. Invitations processed.',
+      data: {
+        organizationId: organization.id,
+        organizationName: organization.name,
+        ownerUserId: organization.owner_userId,
+        invitedEmails: emailList, // or invitedEmailsList.emails if you prefer data from DB
+        inviteListId: invitedEmailsList ? invitedEmailsList.id : null
+      }
+    });
+  } catch (error) {
+    console.error('Error creating organization:', error); // Log the error
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error during organization creation.'
+    });
+  }
+};
+
+// Added: New function to get user organization status
+exports.getUserOrganizationStatus = async (req, res) => {
+  try {
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies && req.cookies.token) { // If you use cookies for tokens
+       token = req.cookies.token;
+    }
+
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+
+    // userService should already be imported at the top of the file
+    const result = await userService.getOrganizationInfoFromToken(token);
+
+    if (result && result.name) {
+      res.status(200).json({ success: true, data: { organizationName: result.name } });
+    } else {
+      // Send success true but with organizationName as false for "Individual"
+      res.status(200).json({ success: true, data: { organizationName: false } });
+    }
+  } catch (error) {
+    console.error('Controller error getting organization status:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
