@@ -15,6 +15,16 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
+    // Check if email exists in any invite list
+    const invitedOrgId = await inviteListService.findOrganizationByEmail(email);
+    let finalUserType = userType;
+    let organization_id = undefined;
+
+    if (invitedOrgId) {
+      finalUserType = 'organization';
+      organization_id = invitedOrgId;
+    }
+
     // Create user
     const user = await userService.create({
       name,
@@ -22,13 +32,15 @@ exports.register = async (req, res) => {
       password,
       dateOfBirth,
       rank,
-      userType,
-      organizationName
+      userType: finalUserType,
+      organizationName,
+      organization_id
     });
-// Simulating user type check
-if (userType === "organization") {
-  return res.json({ redirectTo: "create-organization", userId: user.id });
-}
+
+    // Simulating user type check
+    if (userType === "organization") {
+      return res.json({ redirectTo: "create-organization", userId: user.id });
+    }
 
     sendTokenResponse(user.id, 201, res);
   } catch (error) {

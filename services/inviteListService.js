@@ -55,6 +55,29 @@ class InviteListService {
     );
     return result.hits;
   }
+
+  /**
+   * Check if an email exists in any invite list
+   * @param {string} email - The email address to check
+   * @returns {Promise<string|false>} - Returns organization_id if email exists, false otherwise
+   */
+  async findOrganizationByEmail(email) {
+    const result = await searchService.findDocuments(
+      this.indexName,
+      {
+        term: {
+          emails: email
+        }
+      },
+      0,
+      1 // We only need the first match since we just want to know if it exists
+    );
+
+    if (result.hits && result.hits.length > 0) {
+      return result.hits[0].organization_id;
+    }
+    return false;
+  }
 }
 
 module.exports = new InviteListService();
