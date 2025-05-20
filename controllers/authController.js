@@ -187,7 +187,7 @@ exports.createOrganization = async (req, res) => {
         organizationId: organization.id,
         organizationName: organization.name,
         ownerUserId: organization.owner_userId,
-        invitedEmails: emailList, // or invitedEmailsList.emails if you prefer data from DB
+        invitedEmails: emailList, 
         inviteListId: invitedEmailsList ? invitedEmailsList.id : null
       }
     });
@@ -203,22 +203,26 @@ exports.createOrganization = async (req, res) => {
 // Added: New function to get user organization status
 exports.getUserOrganizationStatus = async (req, res) => {
   try {
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies && req.cookies.token) { // If you use cookies for tokens
-       token = req.cookies.token;
-    }
+    // let token;
+    // if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    //   token = req.headers.authorization.split(' ')[1];
+    // } else if (req.cookies && req.cookies.token) { // If you use cookies for tokens
+    //    token = req.cookies.token;
+    // }
 
 
-    if (!token) {
-      return res.status(401).json({ success: false, message: 'No token provided' });
-    }
+    // if (!token) {
+    //   return res.status(401).json({ success: false, message: 'No token provided' });
+    // }
 
     // userService should already be imported at the top of the file
-    const result = await userService.getOrganizationInfoFromToken(token);
+    const result = await userService.getOrganizationInfoFromUserId(req.user.id);
+    // return result;
+    console.log('result', result);
 
     if (result && result.name) {
+      
+
       res.status(200).json({ success: true, data: { organizationName: result.name } });
     } else {
       // Send success true but with organizationName as false for "Individual"

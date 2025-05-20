@@ -119,16 +119,16 @@ class UserService {
    * Decrypts token, finds user, and returns organization name or false.
    * @param {string} token - JWT token
    */
-  async getOrganizationInfoFromToken(token) {
-    if (!token) {
-      console.error('Token not provided for organization info');
-      return false;
-    }
+  async getOrganizationInfoFromUserId(userId) {
+    // if (!token) {
+    //   console.error('Token not provided for organization info');
+    //   return false;
+    // }
 
     try {
       // Verify token - Ensure JWT_SECRET is available in your environment variables
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decoded.id;
+      // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // const userId = decoded.id;
 
       const user = await this.findById(userId);
       if (!user) {
