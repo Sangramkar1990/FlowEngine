@@ -186,10 +186,33 @@ exports.createOrganization = async (req, res) => {
     // 2. Update the user (owner) with the organization_id
     await userService.updateUserWithOrganization(userId, organization.id);
 
-    // 3. Create the invite list if emails are provided
-    let invitedEmailsList;
+    // 3. Filter out emails that exist in invite lists or are already registered users
+    let filteredEmailList = [];
     if (emailList.length > 0) {
-      invitedEmailsList = await inviteListService.create(organization.id, emailList);
+      filteredEmailList = await Promise.all(
+        emailList.map(async (email) => {
+          // Check if email exists in any invite list
+          const invitedOrgId = await inviteListService.findOrganizationByEmail(email);
+          if (invitedOrgId) {
+            return null;
+          }
+          
+          // Check if email is already registered
+          const existingUser = await userService.findByEmail(email);
+          if (existingUser) {
+            return null;
+          }
+
+          return email;
+        })
+      );
+      
+      // Remove null values and create invite list with filtered emails
+      filteredEmailList = filteredEmailList.filter(email => email !== null);
+      
+      if (filteredEmailList.length > 0) {
+        invitedEmailsList = await inviteListService.create(organization.id, filteredEmailList);
+      }
     }
 
     res.status(201).json({
@@ -199,7 +222,7 @@ exports.createOrganization = async (req, res) => {
         organizationId: organization.id,
         organizationName: organization.name,
         ownerUserId: organization.owner_userId,
-        invitedEmails: emailList, 
+        invitedEmails: filteredEmailList,
         inviteListId: invitedEmailsList ? invitedEmailsList.id : null
       }
     });
@@ -229,13 +252,21 @@ exports.getUserOrganizationStatus = async (req, res) => {
 
     // userService should already be imported at the top of the file
     const result = await userService.getOrganizationInfoFromUserId(req.user.id);
-    // return result;
     console.log('result', result);
 
     if (result && result.name) {
-      
+      // Get the invite list for the organization
+      const inviteList = await inviteListService.findByOrganizationId(result.id);
+      console.log('invited list', inviteList);
+      const invitedEmails = inviteList && inviteList.length > 0 ? inviteList[0].emails : [];
 
-      res.status(200).json({ success: true, data: { organizationName: result.name } });
+      res.status(200).json({ 
+        success: true, 
+        data: { 
+          organizationName: result.name,
+          invitedEmails: invitedEmails
+        } 
+      });
     } else {
       // Send success true but with organizationName as false for "Individual"
       res.status(200).json({ success: true, data: { organizationName: false } });

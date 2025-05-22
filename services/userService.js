@@ -141,7 +141,7 @@ class UserService {
       if (user.organization_id) {
         const organization = await organizationService.findById(user.organization_id);
         if (organization && organization.name) {
-          return { name: organization.name };
+          return { name: organization.name, id: user.organization_id };
         }
         console.warn(`Organization not found for ID: ${user.organization_id} or name is missing (from token)`);
         return false; // Org ID present but org not found or name missing

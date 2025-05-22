@@ -1,0 +1,145 @@
+const searchService = require('./searchService');
+const userService = require('./userService');
+
+class CardService {
+  constructor() {
+    this.indexName = 'cards';
+  }
+
+  async initIndex() {
+    const cardMapping = {
+      properties: {
+        name: { type: 'text' },
+        description: { type: 'text' },
+        videoLink: { type: 'keyword' },
+        type: { type: 'keyword' },
+        effective: { type: 'text' },
+        user: { type: 'keyword' },
+        userName: { type: 'text' },
+        sequence_id: { type: 'keyword' },
+        createdAt: { type: 'date' }
+      }
+    };
+
+    return searchService.createIndex(this.indexName, cardMapping);
+  }
+
+  async getCards(filters = {}, page = 1, limit = 10) {
+    const from = (page - 1) * limit;
+    const must = [];
+    
+    if (filters.type) must.push({ term: { type: filters.type } });
+    if (filters.effective) must.push({ match: { effective: filters.effective } });
+    if (filters.user) must.push({ term: { user: filters.user } });
+    if (filters.sequence_id) must.push({ term: { sequence_id: filters.sequence_id } });
+    
+    const query = must.length > 0 ? { bool: { must } } : { match_all: {} };
+    
+    const result = await searchService.findDocuments(
+      this.indexName,
+      query,
+      from,
+      limit,
+      [{ createdAt: { order: 'desc' } }]
+    );
+    
+    const total = await searchService.countDocuments(this.indexName, query);
+    
+    return {
+      cards: result.hits,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async getCard(id) {
+    return searchService.getDocument(this.indexName, id);
+  }
+
+  async createCard(cardData, userId, sequenceId) {
+    const user = await userService.findById(userId);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const card = {
+      name: cardData.name,
+      description: cardData.description,
+      videoLink: cardData.videoLink,
+      type: cardData.type || 'other',
+      effective: cardData.effective,
+      user: userId,
+      userName: user.name,
+      sequence_id: sequenceId,
+      createdAt: new Date().toISOString()
+    };
+    
+    const result = await searchService.indexDocument(this.indexName, card);
+    return { ...card, id: result._id };
+  }
+
+  async updateCard(id, cardData, userId) {
+    const card = await this.getCard(id);
+    
+    if (!card) {
+      throw new Error('Card not found');
+    }
+    
+    if (card.user !== userId) {
+      throw new Error('Not authorized to update this card');
+    }
+    
+    const updatedCard = {
+      ...card,
+      ...cardData,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await searchService.updateDocument(this.indexName, id, updatedCard);
+    return { ...updatedCard, id };
+  }
+
+  async deleteCard(id, userId) {
+    const card = await this.getCard(id);
+    
+    if (!card) {
+      throw new Error('Card not found');
+    }
+    
+    if (card.user !== userId) {
+      throw new Error('Not authorized to delete this card');
+    }
+    
+    return searchService.deleteDocument(this.indexName, id);
+  }
+
+  async searchCards(query, from = 0, size = 10) {
+    return searchService.multiFieldSearch(
+      this.indexName,
+      ['name', 'description', 'effective'],
+      query,
+      from,
+      size
+    );
+  }
+
+  async getSequenceCards(sequenceId) {
+    const result = await searchService.findDocuments(
+      this.indexName,
+      {
+        term: { sequence_id: sequenceId }
+      },
+      0,
+      100,
+      [{ createdAt: { order: 'desc' } }]
+    );
+    
+    return result.hits;
+  }
+}
+
+module.exports = new CardService();

@@ -1,4 +1,5 @@
 const sequenceService = require('../services/sequenceService');
+const cardService = require('../services/cardService');
 
 // @desc    Get all sequences
 // @route   GET /api/sequences
@@ -73,7 +74,6 @@ exports.getSequence = async (req, res) => {
 // @access  Private
 exports.createSequence = async (req, res) => {
   try {
-    // Create sequence with user ID
     const sequence = await sequenceService.createSequence(req.body, req.user.id);
 
     res.status(201).json({
@@ -82,6 +82,65 @@ exports.createSequence = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Get all sequences
+// @route   GET /api/sequences
+// @access  Public
+exports.getSequences = async (req, res) => {
+  try {
+    const { user } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    const filters = {};
+    if (user) filters.user = user;
+
+    const result = await sequenceService.getSequences(filters, page, limit);
+
+    res.status(200).json({
+      success: true,
+      count: result.sequences.length,
+      pagination: result.pagination,
+      data: result.sequences
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Get sequence by ID
+// @route   GET /api/sequences/:id
+// @access  Public
+exports.getSequence = async (req, res) => {
+  try {
+    const sequence = await sequenceService.getSequence(req.params.id);
+    if (!sequence) {
+      return res.status(404).json({
+        success: false,
+        message: 'Sequence not found'
+      });
+    }
+
+    // Get all cards for this sequence
+    const cards = await cardService.getSequenceCards(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...sequence,
+        cards
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
       message: error.message
     });
