@@ -254,16 +254,106 @@ exports.searchSequences = async (req, res) => {
 };
 
 // @desc    Get sequences by user
-// @route   GET /api/sequences/user/:userId
-// @access  Public
+// @route   GET /api/sequences/user/me
+// @access  Private
 exports.getUserSequences = async (req, res) => {
   try {
-    const sequences = await sequenceService.getUserSequences(req.params.userId);
+    const sequences = await sequenceService.getUserSequences(req.user.id);
 
     res.status(200).json({
       success: true,
       count: sequences.length,
       data: sequences
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+// @desc    Get sequences by user
+// @route   GET /api/sequences/user/:userId
+// @access  Public
+// exports.getUserSequences = async (req, res) => {
+//   try {
+//     const sequences = await sequenceService.getUserSequences(req.params.userId);
+
+//     res.status(200).json({
+//       success: true,
+//       count: sequences.length,
+//       data: sequences
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// };
+
+// @desc    Create new card
+// @route   POST /api/sequences/create-card
+// @access  Private
+exports.createCard = async (req, res) => {
+  try {
+    const { url, name, type, effect, description, sequence_id } = req.body;
+
+    // Validate required fields
+    if (!name || !type || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, type and description'
+      });
+    }
+
+    const card = await cardService.createCard(
+      {
+        url,
+        name,
+        type,
+        effect,
+        description,
+        sequence_id
+      },
+      req.user.id
+    );
+
+    res.status(201).json({
+      success: true,
+      data: card
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Search cards by name
+// @route   GET /api/sequences/search/cards
+// @access  Public
+exports.searchCards = async (req, res) => {
+  try {
+    const { query } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required'
+      });
+    }
+
+    const result = await cardService.searchCardsByName(query, page, limit);
+
+    res.status(200).json({
+      success: true,
+      count: result.cards.length,
+      pagination: result.pagination,
+      data: result.cards
     });
   } catch (error) {
     res.status(500).json({

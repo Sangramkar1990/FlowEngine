@@ -35,7 +35,7 @@ class SequenceService {
       query,
       from,
       limit,
-      [{ createdAt: { order: 'desc' } }]
+      { createdAt: { order: 'desc' } }  // Remove the array wrapper
     );
     
     const total = await searchService.countDocuments(this.indexName, query);

@@ -59,22 +59,17 @@ class CardService {
     return searchService.getDocument(this.indexName, id);
   }
 
-  async createCard(cardData, userId, sequenceId) {
-    const user = await userService.findById(userId);
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-    
+  async createCard(cardData, userId) {
     const card = {
       name: cardData.name,
       description: cardData.description,
-      videoLink: cardData.videoLink,
-      type: cardData.type || 'other',
-      effective: cardData.effective,
+      url: cardData.url,
+      type: cardData.type,
+      effect: cardData.effect,
       user: userId,
-      userName: user.name,
-      sequence_id: sequenceId,
+      sequence_id: cardData.sequence_id || null,
+      userName: cardData.userName || null,
+      effective: cardData.effective || null,
       createdAt: new Date().toISOString()
     };
     
@@ -125,6 +120,37 @@ class CardService {
       from,
       size
     );
+  }
+
+  async searchCardsByName(searchQuery, page = 1, limit = 10) {
+    const from = (page - 1) * limit;
+    const query = {
+      match: {
+        name: {
+          query: searchQuery,
+          fuzziness: 'AUTO'
+        }
+      }
+    };
+    
+    const result = await searchService.findDocuments(
+      this.indexName,
+      query,
+      from,
+      limit,
+      [{ createdAt: { order: 'desc' } }]
+    );
+    
+    const total = await searchService.countDocuments(this.indexName, query);
+    
+    return {
+      cards: result.hits,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    };
   }
 
   async getSequenceCards(sequenceId) {
