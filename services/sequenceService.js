@@ -51,7 +51,27 @@ class SequenceService {
   }
 
   async getSequence(id) {
-    return searchService.getDocument(this.indexName, id);
+    const sequence = await searchService.getDocument(this.indexName, id);
+    if (!sequence) return null;
+
+    // If no cards exist, return sequence as is
+    if (!sequence.cards) {
+      sequence.cards = [];
+      return sequence;
+    }
+
+    // Return sequence with cards in linked list format
+    return {
+      ...sequence,
+      cards: sequence.cards.map(card => ({
+        name: card.name,
+        type: card.type,
+        effect: card.effect,
+        description: card.description,
+        url: card.url,
+        next: card.next
+      }))
+    };
   }
 
   async createSequence(sequenceData, userId) {
@@ -117,7 +137,16 @@ class SequenceService {
       [{ createdAt: { order: 'desc' } }]
     );
     
-    return result.hits;
+    // Fetch cards for each sequence
+    const sequencesWithCards = await Promise.all(result.hits.map(async (sequence) => {
+      const sequenceData = await this.getSequence(sequence.id);
+      return {
+        ...sequence,
+        cards: sequenceData.cards || []
+      };
+    }));
+    
+    return sequencesWithCards;
   }
 }
 
