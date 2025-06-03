@@ -130,13 +130,13 @@ exports.getSequence = async (req, res) => {
     }
 
     // Get all cards for this sequence
-    const cards = await cardService.getSequenceCards(req.params.id);
+    // const cards = await cardService.getSequenceCards(req.params.id);
 
     res.status(200).json({
       success: true,
       data: {
-        ...sequence,
-        cards
+        ...sequence
+        
       }
     });
   } catch (error) {
@@ -152,16 +152,18 @@ exports.getSequence = async (req, res) => {
 // @access  Private
 exports.updateSequence = async (req, res) => {
   try {
+    console.log(req.body);
     // Update sequence
     const sequence = await sequenceService.updateSequence(
       req.params.id,
       req.body,
       req.user.id
     );
+    const sequence_get = await sequenceService.getSequence(req.params.id);
 
     res.status(200).json({
       success: true,
-      data: sequence
+      data: sequence_get
     });
   } catch (error) {
     if (error.message === 'Sequence not found') {

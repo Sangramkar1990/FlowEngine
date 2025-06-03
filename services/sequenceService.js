@@ -1,5 +1,6 @@
 const searchService = require('./searchService');
 const userService = require('./userService');
+const cardService = require('./cardService');
 
 class SequenceService {
   constructor() {
@@ -59,6 +60,11 @@ class SequenceService {
       sequence.cards = [];
       return sequence;
     }
+    else{
+      // Fetch cards for each cards
+      const cards = await Promise.all(sequence.cards.map( card => cardService.getCard(card.id)));
+      console.log('cards', cards);
+    }
 
     // Return sequence with cards in linked list format
     return {
@@ -69,6 +75,7 @@ class SequenceService {
         effect: card.effect,
         description: card.description,
         url: card.url,
+        id: card.id,
         next: card.next
       }))
     };
@@ -110,7 +117,9 @@ class SequenceService {
       updatedAt: new Date().toISOString()
     };
     
-    await searchService.updateDocument(this.indexName, id, updatedSequence);
+    const updatedData = await searchService.updateDocument(this.indexName, id, updatedSequence);
+    const sequence_updated = await this.getSequence(id);
+    console.log('updatedData', sequence_updated);
     return { ...updatedSequence, id };
   }
 
@@ -128,6 +137,31 @@ class SequenceService {
     return searchService.deleteDocument(this.indexName, id);
   }
 
+  // async getUserSequences(userId) {
+  //   const result = await searchService.findDocuments(
+  //     this.indexName,
+  //     { term: { user: userId } },
+  //     0,
+  //     100,
+  //     [{ createdAt: { order: 'desc' } }]
+  //   );
+  //   console.log('sequence result', result);
+    
+  //   // Fetch cards for each sequence
+  //   const sequencesWithCards = await Promise.all(result.hits.map(async (sequence) => {
+  //     const sequenceData = await cardService.getCard(sequence.cards.id);
+  //     console.log('sequenceData', sequenceData);
+      
+  //     return {
+  //       ...sequence,
+  //       cards: sequenceData || []
+  //     };
+  //   }));
+  //   console.log('sequencesWithCards', sequencesWithCards);
+    
+  //   // return sequencesWithCards;
+  //   return result.hits;
+  // }
   async getUserSequences(userId) {
     const result = await searchService.findDocuments(
       this.indexName,
@@ -136,18 +170,35 @@ class SequenceService {
       100,
       [{ createdAt: { order: 'desc' } }]
     );
-    
+    console.log('sequence result', result.hits[2].cards);
+  
     // Fetch cards for each sequence
-    const sequencesWithCards = await Promise.all(result.hits.map(async (sequence) => {
-      const sequenceData = await this.getSequence(sequence.id);
-      return {
-        ...sequence,
-        cards: sequenceData.cards || []
-      };
-    }));
-    
+    const sequencesWithCards = await Promise.all(
+      result.hits.map(async (sequence) => {
+        const cardIds = sequence.cards || [];
+        console.log('sequence new', sequence);
+        console.log('cardIds', cardIds.id);
+  
+        // Fetch each card using cardService.getCard
+        const cards = await Promise.all(
+          cardIds.map((cardId) => { console.log('card id:', cardId.id); const cardReturned = cardService.getCard(cardId.id); console.log('card returned', cardReturned); return cardReturned;})
+          
+        );
+  
+        console.log('sequenceData', cards);
+  
+        return {
+          ...sequence,
+          cards: cards.filter(Boolean) // Remove any null/undefined results
+        };
+      })
+    );
+  
+    console.log('sequencesWithCards', sequencesWithCards);
+  
     return sequencesWithCards;
   }
+  
 }
 
 module.exports = new SequenceService();

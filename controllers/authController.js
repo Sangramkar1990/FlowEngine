@@ -90,6 +90,7 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
+    console.log('req user id', req.user.id);
     const user = await userService.findById(req.user.id);
 
     if (!user) {

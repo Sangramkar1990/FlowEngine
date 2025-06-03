@@ -2,6 +2,7 @@ const searchService = require('./searchService');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const organizationService = require('./organizationService'); // Added: Make sure this path is correct
+const sequenceService = require('./sequenceService');
 
 class UserService {
   constructor() {
@@ -34,7 +35,15 @@ class UserService {
    * @param {string} id - User ID
    */
   async findById(id) {
-    return searchService.getDocument(this.indexName, id);
+    console.log('id', id, 'indexName', this.indexName);
+    // get sequences from user organization id,
+    const user = await searchService.getDocument(this.indexName, id);
+    console.log('user returned', user);
+    const sequences = await sequenceService.getUserSequences(id);
+    const returned_user = {...user, sequence:{...sequences}};
+    console.log('returned user', returned_user)
+
+    return returned_user;
   }
 
   /**
