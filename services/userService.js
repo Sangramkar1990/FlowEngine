@@ -38,12 +38,8 @@ class UserService {
     console.log('id', id, 'indexName', this.indexName);
     // get sequences from user organization id,
     const user = await searchService.getDocument(this.indexName, id);
-    console.log('user returned', user);
-    const sequences = await sequenceService.getUserSequences(id);
-    const returned_user = {...user, sequence:{...sequences}};
-    console.log('returned user', returned_user)
-
-    return returned_user;
+    
+    return user;
   }
 
   /**

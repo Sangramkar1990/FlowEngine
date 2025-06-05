@@ -1,21 +1,21 @@
-const searchService = require('./searchService');
-const userService = require('./userService');
-const cardService = require('./cardService');
+const searchService = require("./searchService");
+const userService = require("./userService");
+const cardService = require("./cardService");
 
 class SequenceService {
   constructor() {
-    this.indexName = 'sequences';
+    this.indexName = "sequences";
   }
 
   async initIndex() {
     const sequenceMapping = {
       properties: {
-        name: { type: 'text' },
-        description: { type: 'text' },
-        user: { type: 'keyword' },
-        userName: { type: 'text' },
-        createdAt: { type: 'date' }
-      }
+        name: { type: "text" },
+        description: { type: "text" },
+        user: { type: "keyword" },
+        userName: { type: "text" },
+        createdAt: { type: "date" },
+      },
     };
 
     return searchService.createIndex(this.indexName, sequenceMapping);
@@ -24,30 +24,30 @@ class SequenceService {
   async getSequences(filters = {}, page = 1, limit = 10) {
     const from = (page - 1) * limit;
     const must = [];
-    
+
     if (filters.user) {
       must.push({ term: { user: filters.user } });
     }
-    
+
     const query = must.length > 0 ? { bool: { must } } : { match_all: {} };
-    
+
     const result = await searchService.findDocuments(
       this.indexName,
       query,
       from,
       limit,
-      { createdAt: { order: 'desc' } }  // Remove the array wrapper
+      { createdAt: { order: "desc" } } // Remove the array wrapper
     );
-    
+
     const total = await searchService.countDocuments(this.indexName, query);
-    
+
     return {
       sequences: result.hits,
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -59,81 +59,92 @@ class SequenceService {
     if (!sequence.cards) {
       sequence.cards = [];
       return sequence;
-    }
-    else{
+    } else {
       // Fetch cards for each cards
-      const cards = await Promise.all(sequence.cards.map( card => cardService.getCard(card.id)));
-      console.log('cards', cards);
-    }
-
-    // Return sequence with cards in linked list format
+      const cards = await Promise.all(
+        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, 
+          data: await cardService.getCard(card.id)}})
+      );
+      // console.log("cards", cards);
+      // Return sequence with cards in linked list format
     return {
       ...sequence,
-      cards: sequence.cards.map(card => ({
-        name: card.name,
-        type: card.type,
-        effect: card.effect,
-        description: card.description,
-        url: card.url,
+      cards: cards.map((card) => ({
+        name: card.data.name,
+        type: card.data.type,
+        effect: card.data.effect,
+        description: card.data.description,
+        url: card.data.url,
         id: card.id,
-        next: card.next
-      }))
+        next: card.next,
+      })),
     };
+      // console.log("cards", cards);
+    }
+    
+
+    
   }
 
   async createSequence(sequenceData, userId) {
-    const user = await userService.findById(userId);
-    
+    console.log("test create sequence");
+
+    const user = await searchService.getDocument('users', userId);
+
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
-    
+
     const sequence = {
       name: sequenceData.name,
       description: sequenceData.description,
       user: userId,
       userName: user.name,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    
+
     const result = await searchService.indexDocument(this.indexName, sequence);
     return { ...sequence, id: result._id };
   }
 
   async updateSequence(id, sequenceData, userId) {
     const sequence = await this.getSequence(id);
-    
+
     if (!sequence) {
-      throw new Error('Sequence not found');
+      throw new Error("Sequence not found");
     }
-    
+
     if (sequence.user !== userId) {
-      throw new Error('Not authorized to update this sequence');
+      throw new Error("Not authorized to update this sequence");
     }
-    
+
     const updatedSequence = {
       ...sequence,
       ...sequenceData,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
-    
-    const updatedData = await searchService.updateDocument(this.indexName, id, updatedSequence);
+
+    const updatedData = await searchService.updateDocument(
+      this.indexName,
+      id,
+      updatedSequence
+    );
     const sequence_updated = await this.getSequence(id);
-    console.log('updatedData', sequence_updated);
+    console.log("updatedData", sequence_updated);
     return { ...updatedSequence, id };
   }
 
   async deleteSequence(id, userId) {
     const sequence = await this.getSequence(id);
-    
+
     if (!sequence) {
-      throw new Error('Sequence not found');
+      throw new Error("Sequence not found");
     }
-    
+
     if (sequence.user !== userId) {
-      throw new Error('Not authorized to delete this sequence');
+      throw new Error("Not authorized to delete this sequence");
     }
-    
+
     return searchService.deleteDocument(this.indexName, id);
   }
 
@@ -146,19 +157,19 @@ class SequenceService {
   //     [{ createdAt: { order: 'desc' } }]
   //   );
   //   console.log('sequence result', result);
-    
+
   //   // Fetch cards for each sequence
   //   const sequencesWithCards = await Promise.all(result.hits.map(async (sequence) => {
   //     const sequenceData = await cardService.getCard(sequence.cards.id);
   //     console.log('sequenceData', sequenceData);
-      
+
   //     return {
   //       ...sequence,
   //       cards: sequenceData || []
   //     };
   //   }));
   //   console.log('sequencesWithCards', sequencesWithCards);
-    
+
   //   // return sequencesWithCards;
   //   return result.hits;
   // }
@@ -168,37 +179,43 @@ class SequenceService {
       { term: { user: userId } },
       0,
       100,
-      [{ createdAt: { order: 'desc' } }]
+      [{ createdAt: { order: "desc" } }]
     );
-    console.log('sequence result', result.hits[2].cards);
-  
+
+    if (!Array.isArray(result.hits)) {
+      throw new Error("Expected result.hits to be an array");
+    }
+    // console.log("sequence result", result.hits[2].cards);
+
     // Fetch cards for each sequence
     const sequencesWithCards = await Promise.all(
       result.hits.map(async (sequence) => {
         const cardIds = sequence.cards || [];
-        console.log('sequence new', sequence);
-        console.log('cardIds', cardIds.id);
-  
+        // console.log("sequence new", sequence);
+        // console.log("cardIds", cardIds);
+        // return {cardId: cardIds};
+
         // Fetch each card using cardService.getCard
         const cards = await Promise.all(
-          cardIds.map((cardId) => { console.log('card id:', cardId.id); const cardReturned = cardService.getCard(cardId.id); console.log('card returned', cardReturned); return cardReturned;})
-          
+          cardIds.map((cardId) => cardId.id ? cardService.getCard(cardId.id): null)
         );
-  
-        console.log('sequenceData', cards);
-  
+
+        // console.log("sequenceData", {
+        //   ...sequence,
+        //   cards: cards.filter(Boolean), // Remove any null/undefined results
+        // });
+
         return {
           ...sequence,
-          cards: cards.filter(Boolean) // Remove any null/undefined results
+          cards: cards.filter(Boolean), // Remove any null/undefined results
         };
       })
     );
-  
-    console.log('sequencesWithCards', sequencesWithCards);
-  
+
+    // console.log("sequencesWithCards", sequencesWithCards);
+
     return sequencesWithCards;
   }
-  
 }
 
 module.exports = new SequenceService();

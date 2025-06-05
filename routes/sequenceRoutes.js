@@ -16,15 +16,23 @@ const verifyToken = require('../middleware/verifyToken');
 
 const router = express.Router();
 
+// const testSequences = () => { 
+// console.log('test sequences-------------1');
+// }; 
+
+// const testSequencesWithId = () => { 
+//   console.log('test sequences ID-------------2');
+//   }; 
+
 // Search route
 router.get('/search', searchSequences);
 
 // User sequences route
-router.get('/user/me', verifyToken, getUserSequences);
+router.get('/user', verifyToken, getUserSequences);
 
 // Main routes
 router.route('/')
-  .get(getSequences)
+  .get( getSequences)
   .post(protect, createSequence);
 
 router.route('/:id')

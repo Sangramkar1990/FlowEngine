@@ -17,7 +17,7 @@ class SearchService {
         index: indexName,
         id
       });
-      console.log('response', response);
+      // console.log('response', response);
 
       return response.body._source;
     } catch (error) {

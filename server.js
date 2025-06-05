@@ -67,7 +67,11 @@ app.get('/check-cors', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.NODE_ENV.trim() === "development" ? process.env.DEV_PORT : 5000;
+// console.log('is development:', process.env.NODE_ENV.trim() === 'development' )
+// console.log('development:', process.env.NODE_ENV )
+// console.log('dev port:', process.env.DEV_PORT);
+// console.log(PORT);
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

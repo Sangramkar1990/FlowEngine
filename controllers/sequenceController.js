@@ -5,7 +5,9 @@ const cardService = require('../services/cardService');
 // @route   GET /api/sequences
 // @access  Public
 exports.getSequences = async (req, res) => {
+  // return { test: true } ;
   try {
+
     // Add query parameters for filtering
     const { type, effective, user } = req.query;
     const page = parseInt(req.query.page, 10) || 1;
@@ -47,6 +49,7 @@ exports.getSequences = async (req, res) => {
 // @route   GET /api/sequences/:id
 // @access  Public
 exports.getSequence = async (req, res) => {
+  // return{test: true};
   try {
     const sequence = await sequenceService.getSequence(req.params.id);
 
@@ -59,6 +62,7 @@ exports.getSequence = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      test: true,
       data: sequence
     });
   } catch (error) {
@@ -120,8 +124,10 @@ exports.getSequences = async (req, res) => {
 // @route   GET /api/sequences/:id
 // @access  Public
 exports.getSequence = async (req, res) => {
+
   try {
     const sequence = await sequenceService.getSequence(req.params.id);
+    
     if (!sequence) {
       return res.status(404).json({
         success: false,
@@ -134,6 +140,7 @@ exports.getSequence = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      
       data: {
         ...sequence
         
@@ -260,6 +267,10 @@ exports.searchSequences = async (req, res) => {
 // @access  Private
 exports.getUserSequences = async (req, res) => {
   try {
+    // res.status(200).json({
+    //   success: true,
+    //   test: "test"
+    // });
     const sequences = await sequenceService.getUserSequences(req.user.id);
 
     res.status(200).json({
@@ -299,7 +310,7 @@ exports.getUserSequences = async (req, res) => {
 // @access  Private
 exports.createCard = async (req, res) => {
   try {
-    const { url, name, type, effect, description, sequence_id } = req.body;
+    const { video, name, type, effect, description, sequence_id } = req.body;
 
     // Validate required fields
     if (!name || !type || !description) {
@@ -311,7 +322,7 @@ exports.createCard = async (req, res) => {
 
     const card = await cardService.createCard(
       {
-        url,
+        video,
         name,
         type,
         effect,

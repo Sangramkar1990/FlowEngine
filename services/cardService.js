@@ -1,9 +1,12 @@
 const searchService = require('./searchService');
 const userService = require('./userService');
+const { createOpenSearchClient } = require('../config/opensearch');
+const { v4: uuidv4 } = require('uuid');
 
 class CardService {
   constructor() {
     this.indexName = 'cards';
+    this.client = createOpenSearchClient();
   }
 
   async initIndex() {
@@ -56,14 +59,30 @@ class CardService {
   }
 
   async getCard(id) {
-    return searchService.getDocument(this.indexName, id);
+    try {
+      const response = await this.client.get({
+        index: this.indexName,
+        id
+      });
+      // console.log('response', response);
+
+      return response.body._source;
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      console.error(`Error getting document: ${error.message}`);
+      throw error;
+    }
+    // return searchService.getDocument(this.indexName, id);
   }
 
   async createCard(cardData, userId) {
+    console.log('cardData', cardData);
     const card = {
       name: cardData.name,
       description: cardData.description,
-      url: cardData.url,
+      url: cardData.video,
       type: cardData.type,
       effect: cardData.effect,
       user: userId,
