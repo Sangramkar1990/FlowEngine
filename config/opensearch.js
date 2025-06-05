@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const createOpenSearchClient = () => {
   const client = new Client({
-    node: process.env.NODE_ENV.trim() === "development" ? process.env.OPNESEARCH_DEV_NODE :"http://opensearch:9200",
+    node: (process.env.NODE_ENV || "").trim() === "development" ? process.env.OPNESEARCH_DEV_NODE || "http://localhost:9200" :"http://opensearch:9200",
   });
 
   return client;
