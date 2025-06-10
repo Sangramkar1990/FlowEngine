@@ -52,8 +52,11 @@ class SequenceService {
   }
 
   async getSequence(id) {
+    // return false;
     const sequence = await searchService.getDocument(this.indexName, id);
     if (!sequence) return null;
+    sequence.id = id;
+    console.log("get sequence :", {sequence: sequence.cards[0]});
 
     // If no cards exist, return sequence as is
     if (!sequence.cards) {
@@ -62,20 +65,34 @@ class SequenceService {
     } else {
       // Fetch cards for each cards
       const cards = await Promise.all(
-        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, 
+        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, position: card.position,
           data: await cardService.getCard(card.id)}})
       );
-      // console.log("cards", cards);
+      let test = {
+        ...sequence,
+        cards: cards.map((card) => ({
+          name: card.data.card.name,
+          type: card.data.card.type,
+          effect: card.data.card.effect,
+          description: card.data.card.description,
+          url: card.data.card.url,
+          id: card.id,
+          position: card.position,
+          next: card.next,
+        })),
+      }
+      // console.log(" test sequence :", {card_position: test.cards[1].position});
       // Return sequence with cards in linked list format
     return {
       ...sequence,
       cards: cards.map((card) => ({
-        name: card.data.name,
-        type: card.data.type,
-        effect: card.data.effect,
-        description: card.data.description,
-        url: card.data.url,
+        name: card.data.card.name,
+        type: card.data.card.type,
+        effect: card.data.card.effect,
+        description: card.data.card.description,
+        url: card.data.card.url,
         id: card.id,
+        position: card.position,
         next: card.next,
       })),
     };
@@ -123,6 +140,7 @@ class SequenceService {
       ...sequenceData,
       updatedAt: new Date().toISOString(),
     };
+    console.log("sequence data in update :", {card: updatedSequence.cards[1]});
 
     const updatedData = await searchService.updateDocument(
       this.indexName,

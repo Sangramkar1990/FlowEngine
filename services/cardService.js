@@ -64,9 +64,9 @@ class CardService {
         index: this.indexName,
         id
       });
-      // console.log('response', response);
+      console.log('response', response);
 
-      return response.body._source;
+      return {card: response.body._source, id: id};
     } catch (error) {
       if (error.statusCode === 404) {
         return null;

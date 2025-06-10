@@ -150,6 +150,7 @@ class SearchService {
    */
   async updateDocument(indexName, id, document) {
     try {
+      console.log(" update document :", {document: document.cards[0]});
       const response = await this.client.update({
         index: indexName,
         id,

@@ -8,7 +8,8 @@ const {
   searchSequences,
   getUserSequences,
   createCard,
-  searchCards // Add this import
+  searchCards, // Add this import
+  getCardById // Add this import
 } = require('../controllers/sequenceController');
 
 const { protect } = require('../middleware/auth');
@@ -45,5 +46,8 @@ router.post('/create-card', verifyToken, createCard);
 
 // Card search route
 router.get('/search/cards', searchCards);
+
+// Get card by ID route
+router.get('/card/:id', getCardById);
 
 module.exports = router;

@@ -127,6 +127,8 @@ exports.getSequence = async (req, res) => {
 
   try {
     const sequence = await sequenceService.getSequence(req.params.id);
+    // return false;
+
     
     if (!sequence) {
       return res.status(404).json({
@@ -137,6 +139,7 @@ exports.getSequence = async (req, res) => {
 
     // Get all cards for this sequence
     // const cards = await cardService.getSequenceCards(req.params.id);
+    console.log("return sequence:" , {sequence: sequence.cards[1]});
 
     res.status(200).json({
       success: true,
@@ -159,7 +162,7 @@ exports.getSequence = async (req, res) => {
 // @access  Private
 exports.updateSequence = async (req, res) => {
   try {
-    console.log(req.body);
+    console.log("update sequence", {req : req.body.cards[0]});
     // Update sequence
     const sequence = await sequenceService.updateSequence(
       req.params.id,
@@ -367,6 +370,31 @@ exports.searchCards = async (req, res) => {
       count: result.cards.length,
       pagination: result.pagination,
       data: result.cards
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+// @desc    Get card by ID
+// @route   GET /api/sequences/card/:id
+// @access  Public
+exports.getCardById = async (req, res) => {
+  try {
+    const card = await cardService.getCard(req.params.id);
+
+    if (!card) {
+      return res.status(404).json({
+        success: false,
+        message: 'Card not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: card
     });
   } catch (error) {
     res.status(500).json({
