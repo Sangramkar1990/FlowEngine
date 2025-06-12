@@ -56,7 +56,7 @@ class SequenceService {
     const sequence = await searchService.getDocument(this.indexName, id);
     if (!sequence) return null;
     sequence.id = id;
-    console.log("get sequence :", {sequence: sequence.cards[0]});
+    // console.log("get sequence :", {sequence: sequence.cards[0]});
 
     // If no cards exist, return sequence as is
     if (!sequence.cards) {

@@ -139,7 +139,7 @@ exports.getSequence = async (req, res) => {
 
     // Get all cards for this sequence
     // const cards = await cardService.getSequenceCards(req.params.id);
-    console.log("return sequence:" , {sequence: sequence.cards[1]});
+    // console.log("return sequence:" , {sequence: sequence.cards[1]});
 
     res.status(200).json({
       success: true,
