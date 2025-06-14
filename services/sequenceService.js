@@ -65,7 +65,7 @@ class SequenceService {
     } else {
       // Fetch cards for each cards
       const cards = await Promise.all(
-        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, position: card.position,
+        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, position: card.position, node_id : card.node_id ? card.node_id : null,
           data: await cardService.getCard(card.id)}})
       );
       let test = {
@@ -94,6 +94,7 @@ class SequenceService {
         id: card.id,
         position: card.position,
         next: card.next,
+        node_id: card.node_id
       })),
     };
       // console.log("cards", cards);
@@ -126,6 +127,7 @@ class SequenceService {
 
   async updateSequence(id, sequenceData, userId) {
     const sequence = await this.getSequence(id);
+    // console.log("recieved sequence data",{data:sequenceData.cards[0]})
 
     if (!sequence) {
       throw new Error("Sequence not found");
@@ -140,7 +142,7 @@ class SequenceService {
       ...sequenceData,
       updatedAt: new Date().toISOString(),
     };
-    console.log("sequence data in update :", {card: updatedSequence.cards[1]});
+    // console.log("sequence data in update :", {card: updatedSequence.cards[1]});
 
     const updatedData = await searchService.updateDocument(
       this.indexName,
