@@ -9,7 +9,8 @@ const {
   getUserSequences,
   createCard,
   searchCards, // Add this import
-  getCardById // Add this import
+  getCardById ,
+  deleteCard// Add this import
 } = require('../controllers/sequenceController');
 
 const { protect } = require('../middleware/auth');
@@ -49,5 +50,8 @@ router.get('/search/cards', searchCards);
 
 // Get card by ID route
 router.get('/card/:id', getCardById);
+
+// Add this route for deleting a card
+router.delete('/card/:id', verifyToken, deleteCard);
 
 module.exports = router;

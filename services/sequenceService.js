@@ -68,29 +68,30 @@ class SequenceService {
         sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, position: card.position, node_id : card.node_id ? card.node_id : null,
           data: await cardService.getCard(card.id)}})
       );
-      let test = {
-        ...sequence,
-        cards: cards.map((card) => ({
-          name: card.data.card.name,
-          type: card.data.card.type,
-          effect: card.data.card.effect,
-          description: card.data.card.description,
-          url: card.data.card.url,
-          id: card.id,
-          position: card.position,
-          next: card.next,
-        })),
-      }
+      // let test = {
+      //   ...sequence,
+      //   cards: cards.map((card) => ({
+      //     name: card.data.card.name,
+      //     type: card.data.card.type,
+      //     effect: card.data.card.effect,
+      //     description: card.data.card.description,
+      //     url: card.data.card.url,
+      //     id: card.id,
+      //     position: card.position,
+      //     next: card.next,
+      //   })),
+      // }
       // console.log(" test sequence :", {card_position: test.cards[1].position});
       // Return sequence with cards in linked list format
     return {
       ...sequence,
       cards: cards.map((card) => ({
-        name: card.data.card.name,
-        type: card.data.card.type,
-        effect: card.data.card.effect,
-        description: card.data.card.description,
-        url: card.data.card.url,
+        name: card.data ? card.data.card.name : null,
+        type: card.data ? card.data.card.type : null,
+        effect: card.data ? card.data.card.effect : null,
+        description: card.data ? card.data.card.description : null,
+        url: card.data ? card.data.card.url : null,
+        card_data_present: card.data ? true : false,
         id: card.id,
         position: card.position,
         next: card.next,

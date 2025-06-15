@@ -403,3 +403,21 @@ exports.getCardById = async (req, res) => {
     });
   }
 };
+// @desc    Delete card
+// @route   DELETE /api/sequences/card/:id
+// @access  Private
+exports.deleteCard = async (req, res) => {
+  try {
+    // console.log("user id:", {user: req.user.id});
+    await cardService.deleteCard(req.params.id, req.user.id);
+    res.status(200).json({ success: true, data: {} });
+  } catch (error) {
+    if (error.message === 'Card not found') {
+      return res.status(404).json({ success: false, message: 'Card not found' });
+    }
+    if (error.message === 'Not authorized to delete this card') {
+      return res.status(401).json({ success: false, message: 'Not authorized to delete this card' });
+    }
+    res.status(400).json({ success: false, message: error.message });
+  }
+};

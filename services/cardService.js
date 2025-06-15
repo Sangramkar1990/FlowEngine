@@ -123,8 +123,14 @@ class CardService {
     if (!card) {
       throw new Error('Card not found');
     }
+    // console.log("id :", {id});
+    // console.log("card : ", {card:card.card});
+    // console.log("card user :", {user:card.card.user});
+    // console.log("both id :", {IS_EQUAL:card.card.user === userId})
+
+
     
-    if (card.user !== userId) {
+    if (card.card.user !== userId) {
       throw new Error('Not authorized to delete this card');
     }
     
