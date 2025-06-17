@@ -1,5 +1,5 @@
 const express = require('express');
-const { createOrganization, getUserOrganizationStatus } = require('../controllers/authController'); // Modified: Import getUserOrganizationStatus
+const { createOrganization, getUserOrganizationStatus, getOrganizationInfo } = require('../controllers/authController'); // Modified: Import getUserOrganizationStatus
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -8,6 +8,6 @@ const router = express.Router();
 router.post('/create', createOrganization); // Assuming this should be protected if it's not already
 
 // New route to get user's organization status (protected)
-router.get('/status', protect, getUserOrganizationStatus); // Added: New route
+router.get('/status', protect, getOrganizationInfo); // Added: New route
 
 module.exports = router;

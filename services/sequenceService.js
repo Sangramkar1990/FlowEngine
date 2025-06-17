@@ -1,6 +1,7 @@
 const searchService = require("./searchService");
 const userService = require("./userService");
 const cardService = require("./cardService");
+const User = require('../models/User.js');
 
 class SequenceService {
   constructor() {
@@ -106,9 +107,9 @@ class SequenceService {
   }
 
   async createSequence(sequenceData, userId) {
-    console.log("test create sequence");
+    console.log("test create sequence", userId);
 
-    const user = await searchService.getDocument('users', userId);
+    const user = await User.findById(userId);
 
     if (!user) {
       throw new Error("User not found");
@@ -124,6 +125,7 @@ class SequenceService {
 
     const result = await searchService.indexDocument(this.indexName, sequence);
     return { ...sequence, id: result._id };
+    // return false;
   }
 
   async updateSequence(id, sequenceData, userId) {

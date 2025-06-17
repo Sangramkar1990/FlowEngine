@@ -2,31 +2,57 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { connectOpenSearch } = require('./config/opensearch');
-const userService = require('./services/userService');
-const sequenceService = require('./services/sequenceService');
+const pool = require('./config/database');
 const organizationRoutes = require('./routes/organizationRoutes');
+const { connectOpenSearch } = require('./config/opensearch');
+const User = require('./models/User');
 
 // Load env vars
 dotenv.config();
-
-// Connect to OpenSearch and initialize indices
 connectOpenSearch().then(async client => {
   if (client) {
     console.log('OpenSearch client initialized');
 
     try {
       // Initialize indices
-      await userService.initIndex();
-      console.log('Users index initialized');
+      // await userService.initIndex();
+      // console.log('Users index initialized');
 
       await sequenceService.initIndex();
       console.log('Sequences index initialized');
     } catch (error) {
-      console.error('Error initializing indices:', error.message);
     }
   }
 });
+
+// Test database connection
+// pool.connect((err, client, release) => {
+//   if (err) {
+//     console.error('Error connecting to PostgreSQL:', err);
+//   } else {
+//     console.log('Connected to PostgreSQL database');
+//     release();
+//     // Automatically create test user if not exists
+//     (async () => {
+//       try {
+//         const existing = await User.findByEmail('test123@gmail.com');
+//         if (!existing) {
+//           await User.create({
+//             name: 'Test User',
+//             email: 'test123@gmail.com',
+//             password: 'qwerty123',
+//             userType: 'individual'
+//           });
+//           console.log('Test user created');
+//         } else {
+//           console.log('Test user already exists');
+//         }
+//       } catch (e) {
+//         console.error('Error creating test user:', e);
+//       }
+//     })();
+//   }
+// });
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
@@ -43,7 +69,7 @@ app.use(cookieParser());
 
 // Enable CORS with credentials and explicit origin
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace '*' with your frontend URL
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 
@@ -68,10 +94,6 @@ app.get('/check-cors', (req, res) => {
 });
 
 const PORT = (process.env.NODE_ENV || "").trim() === "development" ? process.env.DEV_PORT || 5001 : 5000;
-// console.log('is development:', process.env.NODE_ENV.trim() === 'development' )
-// console.log('development:', process.env.NODE_ENV )
-// console.log('dev port:', process.env.DEV_PORT);
-// console.log(PORT);
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
@@ -80,6 +102,5 @@ const server = app.listen(PORT, () => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
   console.log(`Error: ${err.message}`);
-  // Close server & exit process
   server.close(() => process.exit(1));
 });

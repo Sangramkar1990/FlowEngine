@@ -6,7 +6,8 @@
     "start": "node server.js",
     "dev": "set NODE_ENV=development && nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "create-indices": "node scripts/createIndices.js"
+    "create-indices": "node scripts/createIndices.js",
+    "db": "node scripts/setupDatabase.js"
   },
   "keywords": [],
   "author": "sangram.gaurav.kar@gmail.com",
@@ -21,6 +22,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.1",
+    "pg": "^8.16.0",
     "razorpay": "^2.9.6",
     "uuid": "^11.1.0"
   },

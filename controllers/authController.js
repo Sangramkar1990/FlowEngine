@@ -1,6 +1,6 @@
-const userService = require('../services/userService');
-const organizationService = require('../services/organizationService');
-const inviteListService = require('../services/inviteListService');
+const User = require('../models/User');
+const Organization = require('../models/Organization');
+const InviteList = require('../models/InviteList');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -8,17 +8,21 @@ const inviteListService = require('../services/inviteListService');
 exports.register = async (req, res) => {
   try {
     const { name, email, password, dateOfBirth, rank, userType, organizationName } = req.body;
+    // console.log("body or register", {...req.body});
 
     // Check if user already exists
-    const userExists = await userService.findByEmail(email);
+    const userExists = await User.findByEmail(email);
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
+    console.log("test user register")
 
     // Check if email exists in any invite list
-    const invitedOrgId = await inviteListService.findOrganizationByEmail(email);
+    const invitedOrgId = await InviteList.findOrganizationByEmail(email);
     let finalUserType = userType;
     let organization_id = undefined;
+
+    console.log("got if org id")
 
     if (invitedOrgId) {
       finalUserType = 'organization';
@@ -26,7 +30,7 @@ exports.register = async (req, res) => {
     }
 
     // Create user
-    const user = await userService.create({
+    const user = await User.create({
       name,
       email,
       password,
@@ -36,8 +40,8 @@ exports.register = async (req, res) => {
       organizationName,
       organization_id
     });
+    console.log("user created")
 
-    // Simulating user type check
     if (userType === "organization") {
       return res.json({ redirectTo: "create-organization", userId: user.id });
     }
@@ -58,24 +62,20 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email & password
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide an email and password' });
     }
 
-    // Check for user
-    const user = await userService.findByEmail(email);
+    const user = await User.findByEmail(email);
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Check if password matches
-    const isMatch = await userService.matchPassword(password, user.password);
+    const isMatch = await User.matchPassword(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
     
-
     sendTokenResponse(user.id, 200, res);
   } catch (error) {
     res.status(500).json({
@@ -90,19 +90,16 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
-    // console.log('req user id', req.user.id);
-    // return true;
-    const user = await userService.findById(req.user.id);
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
+    if(!req.user.id) return res.status(404).json({success: false, message: 'User not found',});
 
-    // Don't return password
-    const { password, ...userData } = user;
+    const organization = await Organization.findById(req.user.organization_id);
+
+
+    const { password, ...userData } = req.user;
+    userData.organization_name = organization.name;
+    console.log(" dob :", {dob: userData.date_of_birth}) ;
+    userData.dateOfBirth = new Date(userData.date_of_birth).toLocaleDateString("en-US");
 
     res.status(200).json({
       success: true,
@@ -133,8 +130,7 @@ exports.logout = (req, res) => {
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = (userId, statusCode, res) => {
-  // Create token
-  const token = userService.getSignedJwtToken(userId);
+  const token = User.getSignedJwtToken(userId);
 
   const options = {
     expires: new Date(
@@ -143,7 +139,6 @@ const sendTokenResponse = (userId, statusCode, res) => {
     httpOnly: true,
   };
 
-  // Use secure flag in production
   if (process.env.NODE_ENV === 'production') {
     options.secure = true;
   }
@@ -159,12 +154,11 @@ const sendTokenResponse = (userId, statusCode, res) => {
 
 // @desc    Create organization and invite users
 // @route   POST /api/organization/create
-// @access  Private (should be protected in routes)
+// @access  Private
 exports.createOrganization = async (req, res) => {
   try {
     const { organizationName, emails, userId } = req.body;
 
-    // Validate input
     if (!organizationName || !userId) {
       return res.status(400).json({
         success: false,
@@ -172,35 +166,32 @@ exports.createOrganization = async (req, res) => {
       });
     }
 
-    // Split emails into array and trim whitespace
     const emailList = emails ? emails.split(',').map(email => email.trim()).filter(email => email) : [];
 
     // 1. Create the organization
-    const organization = await organizationService.create({
+    const organization = await Organization.create({
       organizationName,
-      userId // This userId is the owner
+      userId
     });
 
     if (!organization || !organization.id) {
       throw new Error('Failed to create organization.');
     }
 
-    // 2. Update the user (owner) with the organization_id
-    await userService.updateUserWithOrganization(userId, organization.id);
+    // 2. Update the user with the organization_id
+    await User.updateUserWithOrganization(userId, organization.id);
 
     // 3. Filter out emails that exist in invite lists or are already registered users
     let filteredEmailList = [];
     if (emailList.length > 0) {
       filteredEmailList = await Promise.all(
         emailList.map(async (email) => {
-          // Check if email exists in any invite list
-          const invitedOrgId = await inviteListService.findOrganizationByEmail(email);
+          const invitedOrgId = await InviteList.findOrganizationByEmail(email);
           if (invitedOrgId) {
             return null;
           }
-          
-          // Check if email is already registered
-          const existingUser = await userService.findByEmail(email);
+
+          const existingUser = await User.findByEmail(email);
           if (existingUser) {
             return null;
           }
@@ -208,73 +199,58 @@ exports.createOrganization = async (req, res) => {
           return email;
         })
       );
-      
-      // Remove null values and create invite list with filtered emails
       filteredEmailList = filteredEmailList.filter(email => email !== null);
-      
-      if (filteredEmailList.length > 0) {
-        invitedEmailsList = await inviteListService.create(organization.id, filteredEmailList);
-      }
+    }
+
+    // 4. Create invite list if there are valid emails
+    let invitedEmailsList = null;
+    if (filteredEmailList.length > 0) {
+      invitedEmailsList = await InviteList.create(organization.id, filteredEmailList);
     }
 
     res.status(201).json({
       success: true,
-      message: 'Organization created successfully. Invitations processed.',
       data: {
-        organizationId: organization.id,
-        organizationName: organization.name,
-        ownerUserId: organization.owner_userId,
-        invitedEmails: filteredEmailList,
-        inviteListId: invitedEmailsList ? invitedEmailsList.id : null
+        organization,
+        invitedEmails: invitedEmailsList ? invitedEmailsList.emails : [],
+        skippedEmails: emailList.length - (filteredEmailList?.length || 0)
       }
     });
   } catch (error) {
-    console.error('Error creating organization:', error); // Log the error
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: error.message || 'Server error during organization creation.'
+      message: error.message
     });
   }
 };
 
-// Added: New function to get user organization status
-exports.getUserOrganizationStatus = async (req, res) => {
+// @desc    Get organization info
+// @route   GET /api/organization/info
+// @access  Private
+exports.getOrganizationInfo = async (req, res) => {
   try {
-    // let token;
-    // if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    //   token = req.headers.authorization.split(' ')[1];
-    // } else if (req.cookies && req.cookies.token) { // If you use cookies for tokens
-    //    token = req.cookies.token;
-    // }
-
-
-    // if (!token) {
-    //   return res.status(401).json({ success: false, message: 'No token provided' });
-    // }
-
-    // userService should already be imported at the top of the file
-    const result = await userService.getOrganizationInfoFromUserId(req.user.id);
-    console.log('result', result);
-
-    if (result && result.name) {
-      // Get the invite list for the organization
-      const inviteList = await inviteListService.findByOrganizationId(result.id);
-      console.log('invited list', inviteList);
-      const invitedEmails = inviteList && inviteList.length > 0 ? inviteList[0].emails : [];
-
-      res.status(200).json({ 
-        success: true, 
-        data: { 
-          organizationName: result.name,
-          invitedEmails: invitedEmails
-        } 
+    const result = await User.getOrganizationInfoFromUserId(req.user.id);
+    
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: 'No organization found for this user'
       });
-    } else {
-      // Send success true but with organizationName as false for "Individual"
-      res.status(200).json({ success: true, data: { organizationName: false } });
     }
+
+    const inviteList = await InviteList.findByOrganizationId(result.id);
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        organization: result,
+        inviteList: inviteList
+      }
+    });
   } catch (error) {
-    console.error('Controller error getting organization status:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
