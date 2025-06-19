@@ -22,19 +22,50 @@ services:
       - opensearch-net
 
   backend:
-    image: node:18
-    container_name: backend
-    working_dir: /usr/src/app
-    volumes:
-      - .:/usr/src/app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "5001:5000"
+    environment:
+      - PORT=5000
+      - DEV_PORT=5001
+      - JWT_SECRET=your_jwt_secret_key
+      - JWT_EXPIRE=30d
+      - JWT_COOKIE_EXPIRE=30
     depends_on:
       - opensearch
+      - postgres
     networks:
       - opensearch-net
     command: ["npm", "start"]
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=InFiniteSQ
+      - POSTGRES_DB=INSQ
+    ports:
+      - "5432:5432"
+    networks:
+      - opensearch-net
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      
+    command: >
+      bash -c "cp /etc/postgresql/pg_hba.conf /tmp/pg_hba.conf &&
+               chmod 600 /tmp/pg_hba.conf &&
+               chown postgres:postgres /tmp/pg_hba.conf &&
+               docker-entrypoint.sh postgres -c hba_file=/tmp/pg_hba.conf"
+
+
 
 networks:
   opensearch-net:
     driver: bridge
+
+volumes:
+  pgdata:
