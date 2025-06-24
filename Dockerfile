@@ -14,6 +14,10 @@ COPY . .
 
 # Copy and use entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
+
+# Make it executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 ENTRYPOINT ["docker-entrypoint.sh"] 
 
 # Expose the server port
