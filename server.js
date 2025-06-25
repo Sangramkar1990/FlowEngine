@@ -10,6 +10,8 @@ const User = require('./models/User');
 // Load env vars
 dotenv.config();
 connectOpenSearch().then(async client => {
+  console.log( process.env.NODE_ENV.length )
+  console.log('development'.length )
   if (client) {
     console.log('OpenSearch client initialized');
 

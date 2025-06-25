@@ -7,8 +7,9 @@
     "dev": "set NODE_ENV=development && nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-indices": "node scripts/createIndices.js",
-    "db": "node scripts/setupDatabase.js"
-  },
+    "db": "node scripts/setupDatabase.js",
+    "db:dev": "set NODE_ENV=development && node scripts/setupDatabase.js"
+    },
   "keywords": [],
   "author": "sangram.gaurav.kar@gmail.com",
   "license": "ISC",

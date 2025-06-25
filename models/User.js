@@ -6,7 +6,6 @@ class User {
   static async create(userData) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(userData.password, salt);
-
     const query = `
       INSERT INTO users (name, email, password, date_of_birth, rank, user_type, organization_name, organization_id)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -83,6 +82,19 @@ class User {
       console.error('Error processing user for organization info:', error.message);
       return false;
     }
+  }
+
+  static async updatePassword(userId, newPassword) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      const query = `
+          UPDATE users 
+          SET password = $1, updated_at = CURRENT_TIMESTAMP 
+          WHERE id = $2
+          RETURNING id, name, email;
+      `;
+      const result = await pool.query(query, [hashedPassword, userId]);
+      return result.rows[0];
   }
 }
 

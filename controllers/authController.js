@@ -8,7 +8,7 @@ const InviteList = require('../models/InviteList');
 exports.register = async (req, res) => {
   try {
     const { name, email, password, dateOfBirth, rank, userType, organizationName } = req.body;
-    // console.log("body or register", {...req.body});
+    console.log("body or register", {...req.body});
 
     // Check if user already exists
     const userExists = await User.findByEmail(email);
@@ -90,14 +90,15 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
+    console.log("test get me");
 
     if(!req.user.id) return res.status(404).json({success: false, message: 'User not found',});
 
     const organization = await Organization.findById(req.user.organization_id);
 
-
+    console.log("test organization",{ organization});
     const { password, ...userData } = req.user;
-    userData.organization_name = organization.name;
+    userData.organization_name = organization?.name ? organization.name : null;
     console.log(" dob :", {dob: userData.date_of_birth}) ;
     userData.dateOfBirth = new Date(userData.date_of_birth).toLocaleDateString("en-US");
 
@@ -253,4 +254,26 @@ exports.getOrganizationInfo = async (req, res) => {
       message: error.message
     });
   }
+};
+
+exports.updatePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const userId = req.user.id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const isMatch = await User.matchPassword(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Old password is incorrect' });
+        }
+
+        const updatedUser = await User.updatePassword(userId, newPassword);
+        res.status(200).json({ success: true, data: updatedUser });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 };

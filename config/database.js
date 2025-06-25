@@ -1,9 +1,11 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+const nodeEnv = (process.env.NODE_ENV || '').trim();
+
 const pool = new Pool({
   user: 'postgres',
-  host: process.env.NODE_ENV === 'development' ? 'localhost' : 'postgres',
+  host: nodeEnv === 'development' ? 'localhost' : 'postgres',
   database: 'INSQ',
   password: 'InFiniteSQ',
   port: 5432,
