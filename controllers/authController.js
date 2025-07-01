@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Organization = require("../models/Organization");
 const InviteList = require("../models/InviteList");
+const organizationService = require("../services/organizationService"); // Added this line
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -22,22 +23,21 @@ exports.register = async (req, res) => {
     const userExists = await User.findByEmail(email);
     if (userExists) {
       return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+        .status(409)
+        .json({ success: false, message: "User already exists", errorType: "validation", field: "email" });
     }
     console.log("test user register");
 
-    // Check if email exists in any invite list
-    const invitedOrgId = await InviteList.findOrganizationByEmail(email);
-    let finalUserType = userType;
-    let organization_id = undefined;
-
-    console.log("got if org id");
-
-    if (invitedOrgId) {
-      finalUserType = "organization";
-      organization_id = invitedOrgId;
+    //check if organization name unique.
+    const isOrgNameNotUnique = await organizationService.checkUnique(organizationName);
+    // console.log("is org name :", {isOrgNameUnique})
+    if (isOrgNameNotUnique) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Organization name already exists", errorType: "validation", field: "organizationName" });
     }
+
+
 
     // Create user
     const user = await User.create({
@@ -46,21 +46,29 @@ exports.register = async (req, res) => {
       password,
       dateOfBirth,
       rank,
-      userType: finalUserType,
+      userType: "admin",
       organizationName,
-      organization_id,
+      
     });
-    console.log("user created");
+    console.log("user created, id :", {id:user.id});
 
     if (userType === "organization") {
-      return res.json({ redirectTo: "create-organization", userId: user.id });
-    }
+      const organization = await Organization.create({
+      organizationName,
+      userId : user.id
+    });
+  }
 
-    sendTokenResponse(user.id, 201, res);
+      // return res.json({ redirectTo: "create-organization", userId: user.id });
+    // }
+
+    // sendTokenResponse(user.id, 201, res);
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
+      errorType: "server",
+      field: null
     });
   }
 };
@@ -334,5 +342,33 @@ exports.updateProfile = async (req, res) => {
     res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Check if organization name is unique
+// @route   GET /api/organization/check-name
+// @access  Public
+exports.checkOrganizationName = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization name is required.",
+      });
+    }
+
+    const isUnique = !(await organizationService.checkUnique(name));
+
+    res.status(200).json({
+      success: true,
+      isUnique,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

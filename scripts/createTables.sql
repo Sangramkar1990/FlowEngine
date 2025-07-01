@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(255) NOT NULL,
   date_of_birth DATE,
   rank VARCHAR(50),
-  user_type VARCHAR(50) NOT NULL,
+  user_type VARCHAR(50) NOT NULL CHECK (user_type IN ('user', 'lead', 'admin', 'superAdmin')),
   organization_name VARCHAR(255),
   organization_id INTEGER REFERENCES organizations(id),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT NULL
+  updated_at TIMESTAMP DEFAULT NULL
 );
 -- Only add the column if it doesn't already exists
     ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();

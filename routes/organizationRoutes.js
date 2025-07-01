@@ -1,13 +1,16 @@
 const express = require('express');
-const { createOrganization, getUserOrganizationStatus, getOrganizationInfo } = require('../controllers/authController'); // Modified: Import getUserOrganizationStatus
+const { createOrganization, getUserOrganizationStatus, getOrganizationInfo, checkOrganizationName } = require('../controllers/authController'); // Modified: Import checkOrganizationName
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Organization creation route (protected)
-router.post('/create', createOrganization); // Assuming this should be protected if it's not already
+
+router.post('/create', createOrganization); 
 
 // New route to get user's organization status (protected)
 router.get('/status', protect, getOrganizationInfo); // Added: New route
+
+// New route to check organization name uniqueness (not protected)
+router.get('/check-name', checkOrganizationName); // Added: New route
 
 module.exports = router;

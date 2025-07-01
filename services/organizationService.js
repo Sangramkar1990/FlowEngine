@@ -1,4 +1,5 @@
 const searchService = require('./searchService');
+const Organization = require('../models/Organization'); // Import the Organization model
 
 class OrganizationService {
   constructor() {
@@ -47,6 +48,19 @@ class OrganizationService {
    */
   async findById(id) {
     return searchService.getDocument(this.indexName, id);
+  }
+
+  /**
+   * Check if an organization name already exists
+   * @param {string} name - The organization name to check
+   * @returns {boolean} - True if the name exists, false otherwise
+   */
+  async checkUnique(name) {
+    // console.log("data in organization name unique", {name});
+    const organization = await Organization.findByName(name);
+    // console.log("org data returned", {organization});
+    // console.log("return response", {org: !!organization});
+    return !!organization;
   }
 }
 
