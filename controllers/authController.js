@@ -24,18 +24,21 @@ exports.register = async (req, res) => {
     if (userExists) {
       return res
         .status(409)
-        .json({ success: false, message: "User already exists", errorType: "validation", field: "email" });
+        .json({ success: false, created:false, message: "User already exists", errorType: "validation", field: "email" });
     }
     console.log("test user register");
 
+    if (userType === "organization") {
     //check if organization name unique.
+
     const isOrgNameNotUnique = await organizationService.checkUnique(organizationName);
     // console.log("is org name :", {isOrgNameUnique})
     if (isOrgNameNotUnique) {
       return res
         .status(409)
-        .json({ success: false, message: "Organization name already exists", errorType: "validation", field: "organizationName" });
+        .json({ success: false,created: false, message: "Organization name already exists", errorType: "validation", field: "organizationName" });
     }
+  }
 
 
 
@@ -54,15 +57,25 @@ exports.register = async (req, res) => {
 
     if (userType === "organization") {
       const organization = await Organization.create({
-      organizationName,
-      userId : user.id
+        organizationName,
+        userId: user.id
+      });
+      await User.updateUserWithOrganization(user.id, organization.id);
+    }
+    
+
+    res.status(201).json({
+      success: true,
+      created: true,
+      data: {
+
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        organizationName: user.organizationName,
+        userType: user.userType
+      }
     });
-  }
-
-      // return res.json({ redirectTo: "create-organization", userId: user.id });
-    // }
-
-    // sendTokenResponse(user.id, 201, res);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -178,6 +191,7 @@ const sendTokenResponse = (userId, statusCode, res) => {
 
   res.status(statusCode).cookie("token", token, options).json({
     success: true,
+    authenticated: true,
     token,
   });
 };
@@ -214,7 +228,7 @@ exports.createOrganization = async (req, res) => {
     }
 
     // 2. Update the user with the organization_id
-    await User.updateUserWithOrganization(userId, organization.id);
+    await User.updateUserWithOrganization(userId, organization.id, organization.name);
 
     // 3. Filter out emails that exist in invite lists or are already registered users
     let filteredEmailList = [];

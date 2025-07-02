@@ -106,3 +106,21 @@ process.on('unhandledRejection', (err, promise) => {
   console.log(`Error: ${err.message}`);
   server.close(() => process.exit(1));
 });
+(async () => {
+  try {
+    const superAdminUser = await User.findByEmail('admin@sequence.com');
+    if (!superAdminUser) {
+      await User.create({
+        name: 'super admin',
+        email: 'admin@sequence.com',
+        password: 'sequenceAdmin123',
+        userType: 'superAdmin'
+      });
+      console.log('Super admin user created');
+    } else {
+      console.log('Super admin user already exists');
+    }
+  } catch (e) {
+    console.error('Error checking/creating super admin user:', e);
+  }
+})();

@@ -39,14 +39,15 @@ class User {
     return result.rows[0] || null;
   }
 
-  static async updateUserWithOrganization(userId, organizationId) {
+  static async updateUserWithOrganization(userId, organizationId, organizationName) {
     const query = `
       UPDATE users 
-      SET organization_id = $1, updated_at = CURRENT_TIMESTAMP 
+      SET organization_id = $1, organization_name = $3, updated_at = CURRENT_TIMESTAMP 
       WHERE id = $2
       RETURNING *
     `;
-    const result = await pool.query(query, [organizationId, userId]);
+    const result = await pool.query(query, [organizationId, userId, organizationName]);
+    console.log("user update result", {result})
     return result.rows[0];
   }
 
