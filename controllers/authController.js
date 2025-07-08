@@ -1,7 +1,20 @@
 const User = require("../models/User");
 const Organization = require("../models/Organization");
 const InviteList = require("../models/InviteList");
-const organizationService = require("../services/organizationService"); // Added this line
+const organizationService = require("../services/organizationService");
+const InviteRequest = require("../models/inviteRequest");
+ // Added this line
+
+// Helper function to generate a unique alphanumeric string
+const generatePublicId = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0987654321';
+  let result = '';
+  const charactersLength = characters.length;
+  for (let i = 0; i < 24; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -51,18 +64,20 @@ exports.register = async (req, res) => {
       rank,
       userType: "admin",
       organizationName,
-      
+
     });
-    console.log("user created, id :", {id:user.id});
+    console.log("user created, id :", { id: user.id });
 
     if (userType === "organization") {
+      const publicId = generatePublicId(); // Generate unique publicId
       const organization = await Organization.create({
         organizationName,
-        userId: user.id
+        userId: user.id,
+        publicId // Pass publicId to Organization.create
       });
       await User.updateUserWithOrganization(user.id, organization.id);
     }
-    
+
 
     res.status(201).json({
       success: true,
@@ -139,6 +154,7 @@ exports.getMe = async (req, res) => {
 
     const { password, ...userData } = req.user;
     userData.organization_name = organization?.name ? organization.name : null;
+    userData.organization_public_id = organization?.public_id ? organization.public_id : null;
     const dobObj = new Date(userData.date_of_birth);
     userData.dateOfBirth = dobObj.toLocaleDateString("en-US");
     // Get components in UTC
@@ -218,9 +234,11 @@ exports.createOrganization = async (req, res) => {
       : [];
 
     // 1. Create the organization
+    const publicId = generatePublicId(); // Generate unique publicId for createOrganization as well
     const organization = await Organization.create({
       organizationName,
       userId,
+      publicId
     });
 
     if (!organization || !organization.id) {
@@ -378,6 +396,58 @@ exports.checkOrganizationName = async (req, res) => {
     res.status(200).json({
       success: true,
       isUnique,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+// @desc    Search organizations by name or public_id
+// @route   GET /api/organization/search
+// @access  Public
+exports.searchOrganizations = async (req, res) => {
+  try {
+    const { searchTerm } = req.query;
+    const  userId  = req.user.id;
+    
+    if (!searchTerm) {
+      return res.status(400).json({
+        success: false,
+        message: 'Query parameter is required for search',
+      });
+    }
+
+    const userRequests = await InviteRequest.findByUserId(userId);
+    // console.log("user requests :", {userRequests})
+
+    const organizations = await Organization.searchByNameOrPublicId(searchTerm);
+
+    if(userRequests.length > 0 && organizations.length > 0){
+      const organizationsWithRequests = organizations.map(org => {
+        const matchingRequest = userRequests.find(req => req.organization_id === org.id);
+        if (matchingRequest) {
+          return { ...org, inviteRequest: matchingRequest };
+        }
+        return org;
+      });
+      return res.status(200).json({
+        success: true,
+        count: organizationsWithRequests.length,
+        data: organizationsWithRequests,
+      });
+    }
+
+    console.log("org list", {organizations});
+
+    res.status(200).json({
+      success: true,
+      count: organizations.length,
+      data: organizations,
     });
   } catch (error) {
     res.status(500).json({

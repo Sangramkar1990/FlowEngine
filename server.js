@@ -7,6 +7,7 @@ const organizationRoutes = require('./routes/organizationRoutes');
 const { connectOpenSearch } = require('./config/opensearch');
 const User = require('./models/User');
 
+
 // Load env vars
 dotenv.config();
 connectOpenSearch().then(async client => {
@@ -60,6 +61,8 @@ connectOpenSearch().then(async client => {
 const authRoutes = require('./routes/authRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const sequenceRoutes = require('./routes/sequenceRoutes');
+const inviteRoutes = require('./routes/inviteRoutes'); 
+const membershipRoutes = require('./routes/membershipRoutes');
 
 const app = express();
 
@@ -80,6 +83,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/sequences', sequenceRoutes);
 app.use('/api/organization', organizationRoutes);
+app.use('/api/invites', inviteRoutes); 
+app.use('/api/memberships', membershipRoutes);
 
 // Home route
 app.get('/', (req, res) => {

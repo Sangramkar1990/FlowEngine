@@ -3,14 +3,15 @@ const pool = require('../config/database');
 class Organization {
   static async create(organizationData) {
     const query = `
-      INSERT INTO organizations (name, owner_user_id)
-      VALUES ($1, $2)
+      INSERT INTO organizations (name, owner_user_id, public_id)
+      VALUES ($1, $2, $3)
       RETURNING *
     `;
     
     const values = [
       organizationData.organizationName,
-      organizationData.userId
+      organizationData.userId,
+      organizationData.publicId
     ];
 
     const result = await pool.query(query, values);
@@ -50,8 +51,21 @@ const query = 'SELECT * FROM organizations WHERE name = $1';
     console.error('Error fetching organization by name:', error);
     throw error;
   }
+  }
 
-
+ static async searchByNameOrPublicId(searchTerm) {
+    const query = `
+      SELECT * FROM organizations
+      WHERE name ILIKE $1 OR public_id ILIKE $1
+    `;
+    const value = `%${searchTerm}%`;
+    try {
+      const { rows } = await pool.query(query, [value]);
+      return rows;
+    } catch (error) {
+      console.error('Error searching organizations:', error);
+      throw error;
+    }
   }
 }
 

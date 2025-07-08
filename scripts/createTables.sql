@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS organizations (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   owner_user_id INTEGER NOT NULL,
+  public_id VARCHAR(255) UNIQUE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -57,4 +58,22 @@ CREATE TABLE IF NOT EXISTS cards (
   user_name VARCHAR(255),
   sequence_id INTEGER REFERENCES sequences(id),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS invite_requests (
+  id SERIAL PRIMARY KEY,
+  organization_id INTEGER REFERENCES organizations(id),
+  user_id INTEGER REFERENCES users(id),
+  status INTEGER DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS memberships (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  organization_id INTEGER REFERENCES organizations(id),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('user', 'teamleader')),
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
