@@ -162,7 +162,7 @@ exports.getSequence = async (req, res) => {
 // @access  Private
 exports.updateSequence = async (req, res) => {
   try {
-    console.log("update sequence", {req : req.body.cards[0]});
+    console.log("update sequence", {req : req.body.cards});
     // Update sequence
     const sequence = await sequenceService.updateSequence(
       req.params.id,

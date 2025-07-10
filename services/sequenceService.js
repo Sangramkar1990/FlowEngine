@@ -57,7 +57,7 @@ class SequenceService {
     const sequence = await searchService.getDocument(this.indexName, id);
     if (!sequence) return null;
     sequence.id = id;
-    // console.log("get sequence :", {sequence: sequence.cards[0]});
+    console.log("get sequence :", {sequence: sequence.cards});
 
     // If no cards exist, return sequence as is
     if (!sequence.cards) {
@@ -66,24 +66,10 @@ class SequenceService {
     } else {
       // Fetch cards for each cards
       const cards = await Promise.all(
-        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, position: card.position, node_id : card.node_id ? card.node_id : null,
+        sequence.cards.map(async(card) =>{ return  { id: card.id, next: card.next, position: card.position, node_id : card.node_id ? card.node_id : null, reverse: card.reverse ? card.reverse : false, bidirection: card.bidirection ? card.bidirection : false,
           data: await cardService.getCard(card.id)}})
       );
-      // let test = {
-      //   ...sequence,
-      //   cards: cards.map((card) => ({
-      //     name: card.data.card.name,
-      //     type: card.data.card.type,
-      //     effect: card.data.card.effect,
-      //     description: card.data.card.description,
-      //     url: card.data.card.url,
-      //     id: card.id,
-      //     position: card.position,
-      //     next: card.next,
-      //   })),
-      // }
-      // console.log(" test sequence :", {card_position: test.cards[1].position});
-      // Return sequence with cards in linked list format
+     
     return {
       ...sequence,
       cards: cards.map((card) => ({
@@ -96,7 +82,9 @@ class SequenceService {
         id: card.id,
         position: card.position,
         next: card.next,
-        node_id: card.node_id
+        node_id: card.node_id,
+        reverse: card.reverse ? card.reverse : false,
+        bidirection: card.bidirection ? card.bidirection : false,
       })),
     };
       // console.log("cards", cards);
@@ -130,7 +118,7 @@ class SequenceService {
 
   async updateSequence(id, sequenceData, userId) {
     const sequence = await this.getSequence(id);
-    // console.log("recieved sequence data",{data:sequenceData.cards[0]})
+    console.log("recieved sequence data",{data:sequenceData.cards})
 
     if (!sequence) {
       throw new Error("Sequence not found");
@@ -153,7 +141,7 @@ class SequenceService {
       updatedSequence
     );
     const sequence_updated = await this.getSequence(id);
-    console.log("updatedData", sequence_updated);
+    console.log("updatedData", updatedData);
     return { ...updatedSequence, id };
   }
 
@@ -171,31 +159,7 @@ class SequenceService {
     return searchService.deleteDocument(this.indexName, id);
   }
 
-  // async getUserSequences(userId) {
-  //   const result = await searchService.findDocuments(
-  //     this.indexName,
-  //     { term: { user: userId } },
-  //     0,
-  //     100,
-  //     [{ createdAt: { order: 'desc' } }]
-  //   );
-  //   console.log('sequence result', result);
 
-  //   // Fetch cards for each sequence
-  //   const sequencesWithCards = await Promise.all(result.hits.map(async (sequence) => {
-  //     const sequenceData = await cardService.getCard(sequence.cards.id);
-  //     console.log('sequenceData', sequenceData);
-
-  //     return {
-  //       ...sequence,
-  //       cards: sequenceData || []
-  //     };
-  //   }));
-  //   console.log('sequencesWithCards', sequencesWithCards);
-
-  //   // return sequencesWithCards;
-  //   return result.hits;
-  // }
   async getUserSequences(userId) {
     const result = await searchService.findDocuments(
       this.indexName,

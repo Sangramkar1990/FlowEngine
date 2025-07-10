@@ -4,12 +4,12 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "set NODE_ENV=development && nodemon server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-indices": "node scripts/createIndices.js",
     "db": "node scripts/setupDatabase.js",
-    "db:dev": "set NODE_ENV=development && node scripts/setupDatabase.js"
-    },
+    "db:dev": "NODE_ENV=development node scripts/setupDatabase.js"
+  },
   "keywords": [],
   "author": "sangram.gaurav.kar@gmail.com",
   "license": "ISC",
@@ -28,6 +28,6 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.10"
   }
 }

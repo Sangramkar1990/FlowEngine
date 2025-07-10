@@ -24,3 +24,17 @@ exports.getMemberships = async (req, res) => {
     });
   }
 };
+
+// @desc    Search memberships by user name or email
+// @route   GET /api/memberships/search
+// @access  Private
+exports.searchMemberships = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: 'Query required' });
+    const memberships = await Membership.searchByUserNameOrEmail(query);
+    res.json(memberships);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -52,6 +52,14 @@ LEFT JOIN organizations o ON m.organization_id = o.id;`;
     const result = await pool.query(query, [membershipId]);
     return result.rows[0];
   }
+
+  static async searchByUserNameOrEmail(query) {
+    const sql = `SELECT m.*, u.name, u.email, u.user_type FROM memberships m
+      JOIN users u ON m.user_id = u.id
+      WHERE LOWER(u.name) LIKE LOWER($1) OR LOWER(u.email) LIKE LOWER($1)`;
+    const result = await pool.query(sql, [`%${query}%`]);
+    return result.rows;
+  }
 }
 
 module.exports = Membership;

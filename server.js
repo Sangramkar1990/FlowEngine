@@ -10,6 +10,7 @@ const User = require('./models/User');
 
 // Load env vars
 dotenv.config();
+console.log("node env :", {env:process.env.NODE_ENV})
 connectOpenSearch().then(async client => {
   // console.log( process.env.NODE_ENV.length )
   // console.log('development'.length )
@@ -28,34 +29,7 @@ connectOpenSearch().then(async client => {
   }
 });
 
-// Test database connection
-// pool.connect((err, client, release) => {
-//   if (err) {
-//     console.error('Error connecting to PostgreSQL:', err);
-//   } else {
-//     console.log('Connected to PostgreSQL database');
-//     release();
-//     // Automatically create test user if not exists
-//     (async () => {
-//       try {
-//         const existing = await User.findByEmail('test123@gmail.com');
-//         if (!existing) {
-//           await User.create({
-//             name: 'Test User',
-//             email: 'test123@gmail.com',
-//             password: 'qwerty123',
-//             userType: 'individual'
-//           });
-//           console.log('Test user created');
-//         } else {
-//           console.log('Test user already exists');
-//         }
-//       } catch (e) {
-//         console.error('Error creating test user:', e);
-//       }
-//     })();
-//   }
-// });
+
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
@@ -63,6 +37,7 @@ const searchRoutes = require('./routes/searchRoutes');
 const sequenceRoutes = require('./routes/sequenceRoutes');
 const inviteRoutes = require('./routes/inviteRoutes'); 
 const membershipRoutes = require('./routes/membershipRoutes');
+const teamRoutes = require('./routes/teamRoutes');
 
 const app = express();
 
@@ -73,10 +48,40 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Enable CORS with credentials and explicit origin
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
+// app.use(cors({
+//   origin: [
+//     'http://localhost:5173',
+//     'http://192.168.0.8:5173'       
+//   ],
+//   credentials: true
+// }));
+
+// 1.1 Define allowed origins
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://192.168.121.120:5173'
+]
+
+// 1.2 CORS options
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (curl, mobile apps, etc)
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+    callback(new Error(`CORS denied for ${origin}`))
+  },
+  credentials: true,
+  // some older browsers choke on 204
+  optionsSuccessStatus: 200
+}
+
+// 1.3 Apply CORS globally
+app.use(cors(corsOptions))
+
+// 1.4 Explicitly handle preflight for all routes
+// app.options('/:all(*)', cors(corsOptions))
+app.options(/.*/, cors(corsOptions));
 
 // Mount routers
 app.use('/api/auth', authRoutes);
@@ -84,6 +89,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/sequences', sequenceRoutes);
 app.use('/api/organization', organizationRoutes);
 app.use('/api/invites', inviteRoutes); 
+app.use('/api/teams', teamRoutes);
 app.use('/api/memberships', membershipRoutes);
 
 // Home route
@@ -103,7 +109,8 @@ app.get('/check-cors', (req, res) => {
 const PORT = (process.env.NODE_ENV || "").trim() === "development" ? process.env.DEV_PORT || 5001 : 5000;
 
 const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  // console.log("satarting...")
+  console.log(`Server running on port2 ${PORT}`);
 });
 
 // Handle unhandled promise rejections

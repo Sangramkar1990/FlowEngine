@@ -1,7 +1,7 @@
 const { Client } = require('@opensearch-project/opensearch');
 
 require('dotenv').config();
-
+console.log("starting opensearch")
 const createOpenSearchClient = () => {
   const client = new Client({
     node: (process.env.NODE_ENV || "").trim() === "development" ? process.env.OPNESEARCH_DEV_NODE || "http://localhost:9200" :"http://opensearch:9200",
@@ -9,6 +9,8 @@ const createOpenSearchClient = () => {
 
   return client;
 };
+
+
 
 const connectOpenSearch = async () => {
   try {

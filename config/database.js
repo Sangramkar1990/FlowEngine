@@ -3,12 +3,14 @@ require('dotenv').config();
 
 const nodeEnv = (process.env.NODE_ENV || '').trim();
 
+
+
 const pool = new Pool({
   user: 'postgres',
   host: nodeEnv === 'development' ? 'localhost' : 'postgres',
   database: 'INSQ',
-  password: 'InFiniteSQ',
-  port: 5432,
+  password: nodeEnv === 'development' ? 'qwerty' :'InFiniteSQ',
+  port: nodeEnv === 'development' ? 5433 : 5432,
 });
 
 // Test connection

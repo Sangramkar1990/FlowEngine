@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   organization_name VARCHAR(255),
   organization_id INTEGER REFERENCES organizations(id),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT NULL
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Only add the column if it doesn't already exists
     ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
@@ -76,4 +76,23 @@ CREATE TABLE IF NOT EXISTS memberships (
   role VARCHAR(50) NOT NULL CHECK (role IN ('user', 'teamleader')),
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS teams (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    organization_id INTEGER REFERENCES organizations(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS team_members (
+    id SERIAL PRIMARY KEY,
+    team_id INTEGER REFERENCES teams(id),
+    membership_id INTEGER REFERENCES memberships(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (team_id, membership_id)
 );
