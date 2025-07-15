@@ -59,7 +59,7 @@ app.use(cookieParser());
 // 1.1 Define allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://192.168.121.120:5173'
+  'http://192.168.0.9:5173'
 ]
 
 // 1.2 CORS options

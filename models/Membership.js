@@ -37,6 +37,7 @@ LEFT JOIN organizations o ON m.organization_id = o.id;`;
   }
 
   static async updateRole(membershipId, newRole) {
+    console.log("Updating membership role:", { membershipId, newRole });
     const query = `
       UPDATE memberships
       SET role = $1, updated_at = CURRENT_TIMESTAMP
@@ -44,6 +45,7 @@ LEFT JOIN organizations o ON m.organization_id = o.id;`;
       RETURNING *
     `;
     const result = await pool.query(query, [newRole, membershipId]);
+    console.log("Updated membership:", result.rows[0]);
     return result.rows[0];
   }
 
@@ -58,6 +60,13 @@ LEFT JOIN organizations o ON m.organization_id = o.id;`;
       JOIN users u ON m.user_id = u.id
       WHERE LOWER(u.name) LIKE LOWER($1) OR LOWER(u.email) LIKE LOWER($1)`;
     const result = await pool.query(sql, [`%${query}%`]);
+    return result.rows;
+  }
+
+  // Get all memberships with user data
+  static async findAllWithUser() {
+    const query = `SELECT m.*, u.name, u.email, u.user_type FROM memberships m JOIN users u ON m.user_id = u.id`;
+    const result = await pool.query(query);
     return result.rows;
   }
 }
