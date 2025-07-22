@@ -9,6 +9,22 @@ CREATE TABLE IF NOT EXISTS organizations (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- Enable pgcrypto extension (only needs to be done once per database)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Step 1: Add column as nullable
+ALTER TABLE organizations ADD COLUMN public_id VARCHAR(255);
+
+-- Step 2: Populate existing rows with unique public_ids
+UPDATE organizations
+SET public_id = gen_random_uuid()::text;
+
+-- Step 3: Add UNIQUE constraint
+ALTER TABLE organizations ADD CONSTRAINT organizations_public_id_key UNIQUE (public_id);
+
+-- Step 4: Alter the column to be NOT NULL
+ALTER TABLE organizations ALTER COLUMN public_id SET NOT NULL;
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
