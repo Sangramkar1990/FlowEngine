@@ -30,7 +30,7 @@ exports.register = async (req, res) => {
       userType,
       organizationName,
     } = req.body;
-    console.log("body or register", { ...req.body });
+    // console.log("body or register", { ...req.body });
 
     // Check if user already exists
     const userExists = await User.findByEmail(email);
@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
         .status(409)
         .json({ success: false, created:false, message: "User already exists", errorType: "validation", field: "email" });
     }
-    console.log("test user register");
+    // console.log("test user register");
 
     if (userType === "organization") {
     //check if organization name unique.
@@ -66,7 +66,7 @@ exports.register = async (req, res) => {
       organizationName,
 
     });
-    console.log("user created, id :", { id: user.id });
+    // console.log("user created, id :", { id: user.id });
 
     if (userType === "organization") {
       const publicId = generatePublicId(); // Generate unique publicId
@@ -442,7 +442,7 @@ exports.searchOrganizations = async (req, res) => {
       });
     }
 
-    console.log("org list", {organizations});
+    // console.log("org list", {organizations});
 
     res.status(200).json({
       success: true,

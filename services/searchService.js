@@ -106,11 +106,11 @@ class SearchService {
           }
         });
 
-        console.log(`Index created: ${indexName}`);
+        // console.log(`Index created: ${indexName}`);
         return response.body;
       }
 
-      console.log(`Index already exists: ${indexName}`);
+      // console.log(`Index already exists: ${indexName}`);
       return { acknowledged: true, index: indexName };
     } catch (error) {
       console.error(`Error creating index ${indexName}: ${error.message}`);
@@ -150,7 +150,7 @@ class SearchService {
    */
   async updateDocument(indexName, id, document) {
     try {
-      console.log(" update document :", {document: document.cards[0]});
+      // console.log(" update document :", {document: document.cards[0]});
       const response = await this.client.update({
         index: indexName,
         id,

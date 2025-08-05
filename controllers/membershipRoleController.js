@@ -37,7 +37,7 @@ exports.updateRole = async (req, res) => {
       try {
        
         const updated = await Membership.updateRole(memberId, role);
-        console.log("Updating role for member:", { memberId, role, updated });
+        // console.log("Updating role for member:", { memberId, role, updated });
         
         if (updated) {
           results.push({ memberId, success: true, role });

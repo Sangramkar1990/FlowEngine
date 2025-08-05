@@ -1,5 +1,3 @@
-
-
 -- Organizations table
 CREATE TABLE IF NOT EXISTS organizations (
   id SERIAL PRIMARY KEY,
@@ -111,4 +109,15 @@ CREATE TABLE IF NOT EXISTS team_members (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (team_id, membership_id)
+);
+
+CREATE TABLE IF NOT EXISTS shares (
+  id SERIAL PRIMARY KEY,
+  sequence_id INTEGER UNIQUE REFERENCES sequences(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  entire_org BOOLEAN DEFAULT TRUE,
+  organization_id INTEGER REFERENCES organizations(id),
+  team_ids INTEGER[],
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

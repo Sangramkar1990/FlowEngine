@@ -29,6 +29,15 @@ const TeamMember = {
     return result.rows;
   },
 
+  // get team membership by membership_id
+  async findByMembershipId(membership_id) {
+    const result = await db.query(
+      'SELECT * FROM memberships WHERE id = $1',
+      [membership_id]
+    );
+    return result.rows[0];
+  },
+
   async getTeamsForMembership(membership_id) {
     const result = await db.query(
       'SELECT * FROM team_members WHERE membership_id = $1',

@@ -15,10 +15,10 @@ const createIndices = async () => {
     
     // Create the indices
     const userResult = await userService.initIndex();
-    console.log('Users index created:', userResult);
+    // console.log('Users index created:', userResult);
     
     const sequenceResult = await sequenceService.initIndex();
-    console.log('Sequences index created:', sequenceResult);
+    // console.log('Sequences index created:', sequenceResult);
     
     process.exit(0);
   } catch (error) {

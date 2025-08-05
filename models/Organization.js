@@ -45,7 +45,7 @@ const query = 'SELECT * FROM organizations WHERE name = $1';
   
   try {
     const { rows } = await pool.query(query, [name]);
-    console.log('response of organization', rows);
+    // console.log('response of organization', rows);
     return rows[0] || null;
   } catch (error) {
     console.error('Error fetching organization by name:', error);

@@ -57,7 +57,7 @@ class SequenceService {
     const sequence = await searchService.getDocument(this.indexName, id);
     if (!sequence) return null;
     sequence.id = id;
-    console.log("get sequence :", {sequence: sequence.cards});
+    // console.log("get sequence :", {sequence: sequence.cards});
 
     // If no cards exist, return sequence as is
     if (!sequence.cards) {
@@ -95,7 +95,7 @@ class SequenceService {
   }
 
   async createSequence(sequenceData, userId) {
-    console.log("test create sequence", userId);
+    // console.log("test create sequence", userId);
 
     const user = await User.findById(userId);
 
@@ -118,7 +118,7 @@ class SequenceService {
 
   async updateSequence(id, sequenceData, userId) {
     const sequence = await this.getSequence(id);
-    console.log("recieved sequence data",{data:sequenceData.cards})
+    // console.log("recieved sequence data",{data:sequenceData.cards})
 
     if (!sequence) {
       throw new Error("Sequence not found");
@@ -141,7 +141,7 @@ class SequenceService {
       updatedSequence
     );
     const sequence_updated = await this.getSequence(id);
-    console.log("updatedData", updatedData);
+    // console.log("updatedData", updatedData);
     return { ...updatedSequence, id };
   }
 

@@ -9,7 +9,7 @@ class Membership {
       RETURNING *
     `;
     const result = await pool.query(query, [userId, organizationId, role]);
-    console.log(result);
+    // console.log(result);
     return result.rows[0];
   }
 
@@ -25,7 +25,7 @@ FROM memberships m
 LEFT JOIN organizations o ON m.organization_id = o.id;`;
     // const result = await pool.query(query, [userId]);
     const result = await pool.query(query);
-    console.log(result.rows);
+    // console.log(result.rows);
 
     return result.rows;
   }
@@ -37,7 +37,7 @@ LEFT JOIN organizations o ON m.organization_id = o.id;`;
   }
 
   static async updateRole(membershipId, newRole) {
-    console.log("Updating membership role:", { membershipId, newRole });
+    // console.log("Updating membership role:", { membershipId, newRole });
     const query = `
       UPDATE memberships
       SET role = $1, updated_at = CURRENT_TIMESTAMP
@@ -45,7 +45,7 @@ LEFT JOIN organizations o ON m.organization_id = o.id;`;
       RETURNING *
     `;
     const result = await pool.query(query, [newRole, membershipId]);
-    console.log("Updated membership:", result.rows[0]);
+    // console.log("Updated membership:", result.rows[0]);
     return result.rows[0];
   }
 

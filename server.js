@@ -38,6 +38,7 @@ const sequenceRoutes = require('./routes/sequenceRoutes');
 const inviteRoutes = require('./routes/inviteRoutes'); 
 const membershipRoutes = require('./routes/membershipRoutes');
 const teamRoutes = require('./routes/teamRoutes');
+const shareRoutes = require('./routes/shareRoutes');
 
 const app = express();
 
@@ -59,7 +60,9 @@ app.use(cookieParser());
 // 1.1 Define allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://192.168.0.9:5173'
+  'http://192.168.0.9:5173',
+  'http://192.168.121.120:5173',
+  'http://192.168.173.120:5173'
 ]
 
 // 1.2 CORS options
@@ -91,6 +94,7 @@ app.use('/api/organization', organizationRoutes);
 app.use('/api/invites', inviteRoutes); 
 app.use('/api/teams', teamRoutes);
 app.use('/api/memberships', membershipRoutes);
+app.use('/api/shares', shareRoutes);
 
 // Home route
 app.get('/', (req, res) => {

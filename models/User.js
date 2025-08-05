@@ -47,7 +47,7 @@ class User {
       RETURNING *
     `;
     const result = await pool.query(query, [organizationId, userId, organizationName]);
-    console.log("user update result", {result})
+    // console.log("user update result", {result})
     return result.rows[0];
   }
 

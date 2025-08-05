@@ -1,5 +1,10 @@
 const sequenceService = require('../services/sequenceService');
 const cardService = require('../services/cardService');
+// import Share model
+const Share = require('../models/Share');
+const Membership = require('../models/Membership');
+const TeamMember = require('../models/TeamMember');
+
 
 // @desc    Get all sequences
 // @route   GET /api/sequences
@@ -31,6 +36,8 @@ exports.getSequences = async (req, res) => {
     // Get sequences with pagination
     const result = await sequenceService.getSequences(filters, page, limit);
 
+    // console.log("result:", result);
+
     res.status(200).json({
       success: true,
       count: result.sequences.length,
@@ -48,10 +55,13 @@ exports.getSequences = async (req, res) => {
 // @desc    Get single sequence
 // @route   GET /api/sequences/:id
 // @access  Public
-exports.getSequence = async (req, res) => {
+exports.getSequenceTest = async (req, res) => {
   // return{test: true};
   try {
     const sequence = await sequenceService.getSequence(req.params.id);
+
+    res.status(200).json({sequence: sequence});
+
 
     if (!sequence) {
       return res.status(404).json({
@@ -60,11 +70,23 @@ exports.getSequence = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      success: true,
-      test: true,
-      data: sequence
-    });
+    const card = await cardService.getBySequenceId(req.params.id);
+
+  const response = {
+    success: true,
+    test: true,
+    data: sequence,
+    cardPresent: card != null,          // boolean flag
+    ...(card ? { share: card.share } : {}) // add share only if card exists
+  };
+
+  res.status(200).json(response);
+
+    // res.status(200).json({
+    //   success: true,
+    //   test: true,
+    //   data: sequence
+    // });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -103,6 +125,8 @@ exports.getSequences = async (req, res) => {
 
     const filters = {};
     if (user) filters.user = user;
+
+    // console.log("user:", {user: req.user.id});
 
     const result = await sequenceService.getSequences(filters, page, limit);
 
@@ -162,7 +186,7 @@ exports.getSequence = async (req, res) => {
 // @access  Private
 exports.updateSequence = async (req, res) => {
   try {
-    console.log("update sequence", {req : req.body.cards});
+    // console.log("update sequence", {req : req.body.cards});
     // Update sequence
     const sequence = await sequenceService.updateSequence(
       req.params.id,
@@ -275,6 +299,32 @@ exports.getUserSequences = async (req, res) => {
     //   test: "test"
     // });
     const sequences = await sequenceService.getUserSequences(req.user.id);
+    console.log("sequences:", sequences);
+    // get membership id by user_id
+    const membership = await Membership.findByUserId(req.user.id);
+    if (membership || membership.length !== 0) {
+      let membershipId = membership[0].id;
+
+      // get team Id from teamMember model using membershipId
+      const teamMember = await TeamMember.findByMembershipId(membershipId);
+      if (teamMember && teamMember.length > 0) {
+
+        let teamId = teamMember[0].team_id;
+        // get shares by team_id
+        const shares = await Share.findByTeamId(teamId);
+        if (shares && shares.length > 0) {
+           console.log("shares:", shares);
+        
+        console.log("team id:", teamMember[0].team_id);
+      // console.log("membership:", membership[0].id);
+        }
+      }
+
+    }
+
+
+
+    // console.log("memberships:", membership.id);
 
     res.status(200).json({
       success: true,

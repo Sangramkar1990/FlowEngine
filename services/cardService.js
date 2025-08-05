@@ -64,7 +64,7 @@ class CardService {
         index: this.indexName,
         id
       });
-      console.log('response', response);
+      // console.log('response', response);
 
       return {card: response.body._source, id: id};
     } catch (error) {
@@ -78,7 +78,7 @@ class CardService {
   }
 
   async createCard(cardData, userId) {
-    console.log('cardData', cardData);
+    // console.log('cardData', cardData);
     const card = {
       name: cardData.name,
       description: cardData.description,

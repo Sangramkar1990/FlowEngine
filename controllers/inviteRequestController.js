@@ -67,12 +67,12 @@ exports.getInviteRequestsByUser = async (req, res) => {
   try {
     const  userId  = req.user.id;
     const {user} = req;
-    console.log("user data", {user: user.organization_id});
+    // console.log("user data", {user: user.organization_id});
     // check if user is owner of an organization
     let inviteRequests;
     if(user.organization_id){
         inviteRequests = await InviteRequest.findByOrganizationId(user.organization_id);
-        console.log("invites to org", {inviteRequests});
+        // console.log("invites to org", {inviteRequests});
         res.status(200).json({ success: true, data: inviteRequests });
     }
     else {

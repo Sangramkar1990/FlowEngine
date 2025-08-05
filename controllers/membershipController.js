@@ -4,7 +4,7 @@ const Membership = require('../models/Membership');
 // @route   GET /api/memberships/me
 // @access  Private
 exports.getMemberships = async (req, res) => {
-    console.log("req.user", req.user);
+    // console.log("req.user", req.user);
   try {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ success: false, message: 'User not authenticated' });

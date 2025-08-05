@@ -35,7 +35,7 @@ class UserService {
    * @param {string} id - User ID
    */
   async findById(id) {
-    console.log('id', id, 'indexName', this.indexName);
+    // console.log('id', id, 'indexName', this.indexName);
     // get sequences from user organization id,
     const user = await searchService.getDocument(this.indexName, id);
     
