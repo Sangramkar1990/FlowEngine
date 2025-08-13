@@ -1,4 +1,4 @@
-//import share model
+based on createShare and updateShare in api.js and the controller function in shareController.js , update the shareSlice.js also Share.jsx//import share model
 const express = require('express');
 const Share = require('../models/Share');
 
