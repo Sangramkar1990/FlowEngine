@@ -471,3 +471,22 @@ exports.deleteCard = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Get cards by user
+// @route   GET /api/sequences/cards/user/me
+// @access  Private
+exports.getCardsByUser = async (req, res) => {
+    try {
+        const userId = req.user.id; // Extract user ID from token
+        const cards = await cardService.getCardByUser(userId);
+        res.status(200).json({
+            success: true,
+            data: cards
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};

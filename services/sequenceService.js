@@ -203,6 +203,8 @@ class SequenceService {
 
     return sequencesWithCards;
   }
+
+
 }
 
 module.exports = new SequenceService();

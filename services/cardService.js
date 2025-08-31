@@ -191,6 +191,11 @@ class CardService {
     
     return result.hits;
   }
+    async getCardByUser(userId) {
+    const query = { term: { user: userId } };
+    const result = await searchService.findDocuments(this.indexName, query);
+    return result.hits;
+}
 }
 
 module.exports = new CardService();
