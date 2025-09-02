@@ -82,7 +82,7 @@ const corsOptions = {
 // 1.3 Apply CORS globally
 app.use(cors(corsOptions))
 
- 1.4 Explicitly handle preflight for all routes
+// 1.4 Explicitly handle preflight for all routes
 // app.options('/:all(*)', cors(corsOptions))
 app.options(/.*/, cors(corsOptions));
 

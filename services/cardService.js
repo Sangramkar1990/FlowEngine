@@ -11,6 +11,7 @@ class CardService {
 
   async initIndex() {
     const cardMapping = {
+      mappings: {
       properties: {
         name: { type: 'text' },
         description: { type: 'text' },
@@ -21,7 +22,7 @@ class CardService {
         userName: { type: 'text' },
         sequence_id: { type: 'keyword' },
         createdAt: { type: 'date' }
-      }
+      }}
     };
 
     return searchService.createIndex(this.indexName, cardMapping);
@@ -192,7 +193,8 @@ class CardService {
     return result.hits;
   }
     async getCardByUser(userId) {
-    const query = { term: { user: userId } };
+    // const query = { term: { user: userId } };
+    const query = { match_all: {} };
     const result = await searchService.findDocuments(this.indexName, query);
     return result.hits;
 }
