@@ -2,6 +2,7 @@ const searchService = require('./searchService');
 const userService = require('./userService');
 const { createOpenSearchClient } = require('../config/opensearch');
 const { v4: uuidv4 } = require('uuid');
+const oneWeekAgoISO = require('../helper/dateHelper').oneWeekAgoISO;
 
 class CardService {
   constructor() {
@@ -27,6 +28,7 @@ class CardService {
 
     return searchService.createIndex(this.indexName, cardMapping);
   }
+  
 
   async getCards(filters = {}, page = 1, limit = 10) {
     const from = (page - 1) * limit;
@@ -198,6 +200,46 @@ class CardService {
     const result = await searchService.findDocuments(this.indexName, query);
     return result.hits;
 }
+
+  async getAllCards(page = 1, limit = 10) {
+    const from = (page - 1) * limit;
+    const query = { match_all: {} };
+    
+    const result = await searchService.findDocuments(
+      this.indexName,
+      query,
+      from,
+      limit,
+      [{ createdAt: { order: 'desc' } }]
+    );
+    
+    const total = await searchService.countDocuments(this.indexName, query);
+    
+    return {
+      cards: result.hits,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async getTotalCardCount() {
+   const totalQuery = { match_all: {} };
+    const weeklyQuery = { range: { createdAt: { gte: oneWeekAgoISO() } } };
+     const [total, addedLastWeek] = await Promise.all([
+    searchService.countDocuments('cards', totalQuery),
+    searchService.countDocuments('cards', weeklyQuery)
+  ]);
+    return { total, addedLastWeek };
+  }
+
+  async techniquebreakdown() {
+    const query = { match_all: {} };
+    const result = await searchService.findDocuments(this.indexName, query, 0, 1000);
+    return result.hits;
+  }
 }
 
 module.exports = new CardService();

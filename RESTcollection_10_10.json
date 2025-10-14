@@ -1,0 +1,1042 @@
+{
+  "info": {
+    "name": "Jitsu FlowEngine API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"yourpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"yourpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"yourcurrentpassword\",\n  \"newPassword\": \"yournewpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/update-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "update-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/update-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "update-profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Organization",
+      "item": [
+        {
+          "name": "Create Organization",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Organization\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "organization",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Organization Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "organization",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Organization Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/check-name?name=My%20Organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "organization",
+                "check-name"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "My%20Organization"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Organizations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/organization/search?q=My",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "organization",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "My"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Team\",\n  \"organization_id\": \"your-organization-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Team",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Updated Team\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/your-team-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "your-team-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Team",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/your-team-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "your-team-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Teams By Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/organization/your-organization-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "organization",
+                "your-organization-id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invites",
+      "item": [
+        {
+          "name": "Create Invite Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"your-organization-id\",\n  \"email\": \"invitee@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invites",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invites"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Invite Request Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"accepted\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invites/your-invite-id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invites",
+                "your-invite-id",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Invite Requests By Organization",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invites/organization/your-organization-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invites",
+                "organization",
+                "your-organization-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Invite Requests By User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invites/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invites",
+                "user"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Memberships",
+      "item": [
+        {
+          "name": "Get My Memberships",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/memberships/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "memberships",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Memberships",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/memberships/search?q=test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "memberships",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membershipId\": \"your-membership-id\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/memberships/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "memberships",
+                "role"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Memberships",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/memberships",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "memberships"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sequences",
+      "item": [
+        {
+          "name": "Get Sequences",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Sequence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Sequence\",\n  \"description\": \"This is a test sequence.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Sequence",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/your-sequence-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "your-sequence-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Sequence",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Updated Sequence\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/your-sequence-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "your-sequence-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Sequence",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/your-sequence-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "your-sequence-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Sequences",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/search?q=test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Sequences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Card",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sequenceId\": \"your-sequence-id\",\n  \"content\": \"This is a card.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/create-card",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "create-card"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/search/cards?q=test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "search",
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Card By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/card/your-card-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "card",
+                "your-card-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Card",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/card/your-card-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "card",
+                "your-card-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Cards By User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sequences/cards/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sequences",
+                "cards",
+                "user"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shares",
+      "item": [
+        {
+          "name": "Create Share",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sequence_id\": \"your-sequence-id\",\n  \"shared_with_id\": \"user-id-to-share-with\",\n  \"permission_level\": \"read\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shares"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Share",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permission_level\": \"write\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shares/your-share-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shares",
+                "your-share-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Share By Sequence ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shares/your-sequence-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shares",
+                "your-sequence-id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/search/your-index?q=test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "search",
+                "your-index"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Index",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/search/index/your-index",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "search",
+                "index",
+                "your-index"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Index Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": {\n    \"title\": \"My Document\",\n    \"content\": \"This is a test document.\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/search/your-index",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "search",
+                "your-index"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Document",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": {\n    \"title\": \"My Updated Document\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/search/your-index/your-document-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "search",
+                "your-index",
+                "your-document-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/search/your-index/your-document-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "search",
+                "your-index",
+                "your-document-id"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

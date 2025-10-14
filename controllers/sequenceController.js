@@ -4,6 +4,7 @@ const cardService = require('../services/cardService');
 const Share = require('../models/Share');
 const Membership = require('../models/Membership');
 const TeamMember = require('../models/TeamMember');
+const Team = require('../models/Team');
 
 
 // @desc    Get all sequences
@@ -490,3 +491,63 @@ exports.getCardsByUser = async (req, res) => {
         });
     }
 };
+// 1. User Sequences API
+exports.getUserSequencesAndShared = async (req, res) => {
+  try{
+
+      
+  const userId = req.params.userId;
+  // Get memberships for user
+  const memberships = await Membership.findByUserId(userId);
+
+  let sharedSequences = [];
+  for (const membership of memberships) {
+    const teamMemberships = await TeamMember.getTeamsForMembership(membership.id);
+    for (const tm of teamMemberships) {
+      const team_id = tm.team_id;
+      const shares = await Share.findByTeamId(team_id);
+      for (const share of shares) {
+        const sequence = await sequenceService.getSequence(share.sequence_id);
+        // Get team name if needed
+        let groupName = team_id;
+        if (Team && Team.getById) {
+          const team = await Team.getById(team_id);
+          groupName = team ? team.name : team_id;
+        }
+        sharedSequences.push({
+          ...sequence,
+          share: true,
+          groupName
+        });
+      }
+    }
+  }
+   // Sequences created by user
+  const createdSequences = await sequenceService.getUserSequences(userId);
+  const createdFormatted = createdSequences.map(seq => ({
+    ...seq,
+    share: false
+  }));
+
+  // Merge and deduplicate by sequence id
+  const allSequences = [...createdFormatted, ...sharedSequences];
+  const uniqueSequences = [];
+  const seen = new Set();
+  for (const seq of allSequences) {
+    if (!seen.has(seq.id)) {
+      uniqueSequences.push(seq);
+      seen.add(seq.id);
+    }
+  }
+
+  res.json(uniqueSequences);
+
+  }
+  catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+  
+}
+}

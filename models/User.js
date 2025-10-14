@@ -86,14 +86,15 @@ class User {
   }
 
   static async updateProfile(userId, profileData) {
-    const { name, dateOfBirth, rank } = profileData;
+    const { name, isoUTCDOB, rank } = profileData;
     const query = `
       UPDATE users
       SET name = $1, date_of_birth = $2, rank = $3, updated_at = CURRENT_TIMESTAMP
       WHERE id = $4
       RETURNING id, name, email, date_of_birth, rank, user_type, organization_name, organization_id;
     `;
-    const values = [name, dateOfBirth || null, rank?.toLowerCase() || null, userId];
+    const values = [name, isoUTCDOB || null, rank?.toLowerCase() || null, userId];
+    // return values;
     const result = await pool.query(query, values);
     return result.rows[0];
   }

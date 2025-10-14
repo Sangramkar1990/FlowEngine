@@ -11,7 +11,8 @@ const {
   searchCards, // Add this import
   getCardById ,
   deleteCard, // Add this import
-  getCardsByUser // Add this import
+  getCardsByUser ,// Add this import
+  getUserSequencesAndShared,
 } = require('../controllers/sequenceController');
 
 const { protect } = require('../middleware/auth');
@@ -57,5 +58,9 @@ router.delete('/card/:id', verifyToken, deleteCard);
 
 // Add this route to fetch cards by user ID
 router.get('/cards/user', verifyToken, getCardsByUser);
+
+// ...existing code...
+router.get('user/test', verifyToken,getUserSequencesAndShared);
+// ...existing code...
 
 module.exports = router;

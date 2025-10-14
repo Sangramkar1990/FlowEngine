@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "set NODE_ENV=development && nodemon server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
+    "dev:linux": "NODE_ENV=development nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-indices": "node scripts/createIndices.js",
     "db": "node scripts/setupDatabase.js",

@@ -345,6 +345,7 @@ exports.updatePassword = async (req, res) => {
     }
 
     const updatedUser = await User.updatePassword(userId, newPassword);
+
     res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -359,11 +360,34 @@ exports.updateProfile = async (req, res) => {
     const userId = req.user.id;
     const { name, dateOfBirth, rank } = req.body;
 
+    let isoUTCDOB ;
+
+    if(dateOfBirth){
+      const updatedDOB = new Date(dateOfBirth);
+      isoUTCDOB = updatedDOB.toISOString();
+    }
+
+    
+
+    // const profile = await User.findById(userId);
+    // return res.status(200).json({ success: true, data: profile });
+
     const updatedUser = await User.updateProfile(userId, {
       name,
-      dateOfBirth,
+      isoUTCDOB,
       rank,
     });
+
+    // return res.status(200).json({ success: true, data: updatedUser, inputDate : isoUTCDOB });
+
+    const dobObj = new Date(updatedUser.date_of_birth);
+    updatedUser.dateOfBirth = dobObj.toLocaleDateString("en-US");
+    // Get components in UTC
+    const year = dobObj.getUTCFullYear();
+    const month = String(dobObj.getUTCMonth() + 1).padStart(2, "0"); // Months are zero-based
+    const day = String(dobObj.getUTCDate()).padStart(2, "0");
+
+    updatedUser.DOB = `${year}-${month}-${day}`;
 
     if (!updatedUser) {
       return res
