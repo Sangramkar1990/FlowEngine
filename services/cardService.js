@@ -18,6 +18,7 @@ class CardService {
         description: { type: 'text' },
         videoLink: { type: 'keyword' },
         type: { type: 'keyword' },
+        difficulty: { type: 'keyword' },
         effective: { type: 'text' },
         user: { type: 'keyword' },
         userName: { type: 'text' },
@@ -30,7 +31,7 @@ class CardService {
   }
   
 
-  async getCards(filters = {}, page = 1, limit = 10) {
+  async getCards(filters = {}, page = 1, limit = 100) {
     const from = (page - 1) * limit;
     const must = [];
     
@@ -86,6 +87,7 @@ class CardService {
       name: cardData.name,
       description: cardData.description,
       url: cardData.video,
+      difficulty: cardData.difficulty,
       type: cardData.type,
       effect: cardData.effect,
       user: userId,
@@ -150,7 +152,7 @@ class CardService {
     );
   }
 
-  async searchCardsByName(searchQuery, page = 1, limit = 10) {
+  async searchCardsByName(searchQuery, page = 1, limit = 100) {
     const from = (page - 1) * limit;
     const query = {
       match: {
@@ -195,13 +197,14 @@ class CardService {
     return result.hits;
   }
     async getCardByUser(userId) {
+     
     // const query = { term: { user: userId } };
     const query = { match_all: {} };
     const result = await searchService.findDocuments(this.indexName, query);
     return result.hits;
 }
 
-  async getAllCards(page = 1, limit = 10) {
+  async getAllCards(page = 1, limit = 100) {
     const from = (page - 1) * limit;
     const query = { match_all: {} };
     

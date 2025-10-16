@@ -124,9 +124,9 @@ class SequenceService {
       throw new Error("Sequence not found");
     }
 
-    if (sequence.user !== userId) {
-      throw new Error("Not authorized to update this sequence");
-    }
+    // if (sequence.user !== userId) {
+    //   throw new Error("Not authorized to update this sequence");
+    // }
 
     const updatedSequence = {
       ...sequence,
@@ -200,6 +200,68 @@ class SequenceService {
     );
 
     // console.log("sequencesWithCards", sequencesWithCards);
+
+    return sequencesWithCards;
+  }
+
+
+  async getFullSequences() {
+
+    const result = await searchService.findDocuments(
+      this.indexName,
+      { match_all: {} },
+      0,
+      1000, // A high limit to get all sequences
+      [{ createdAt: { order: "desc" } }]
+    );
+    // return result.hits;
+
+    if (!Array.isArray(result.hits)) {
+      throw new Error("Expected result.hits to be an array");
+    }
+
+    const sequencesWithCards = await Promise.all(
+      result.hits.map(async (sequence) => {
+        if (!sequence.cards) {
+          sequence.cards = [];
+          return sequence;
+        }
+
+        const cards = await Promise.all(
+          sequence.cards.map(async (card) => {
+            if (!card.id) return null;
+            const cardData = await cardService.getCard(card.id);
+            return {
+              id: card.id,
+              next: card.next,
+              position: card.position,
+              node_id: card.node_id ? card.node_id : null,
+              reverse: card.reverse ? card.reverse : false,
+              bidirection: card.bidirection ? card.bidirection : false,
+              data: cardData
+            };
+          })
+        );
+
+        return {
+          ...sequence,
+          cards: cards.filter(c => c && c.data).map((card) => ({
+            name: card.data.card.name,
+            // type: card.data.card.type,
+            // effect: card.data.card.effect,
+            // description: card.data.card.description,
+            // url: card.data.card.url,
+            // card_data_present: true,
+            // id: card.id,
+            // position: card.position,
+            // next: card.next,
+            // node_id: card.node_id,
+            // reverse: card.reverse,
+            // bidirection: card.bidirection,
+          })),
+        };
+      })
+    );
 
     return sequencesWithCards;
   }

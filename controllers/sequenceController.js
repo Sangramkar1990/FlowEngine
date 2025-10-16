@@ -364,7 +364,7 @@ exports.getUserSequences = async (req, res) => {
 // @access  Private
 exports.createCard = async (req, res) => {
   try {
-    const { video, name, type, effect, description, sequence_id } = req.body;
+    const { video, name, type, effect, description, sequence_id, difficulty } = req.body;
 
     // Validate required fields
     if (!name || !type || !description) {
@@ -381,7 +381,8 @@ exports.createCard = async (req, res) => {
         type,
         effect,
         description,
-        sequence_id
+        sequence_id,
+        difficulty,
       },
       req.user.id
     );
@@ -551,3 +552,22 @@ exports.getUserSequencesAndShared = async (req, res) => {
   
 }
 }
+
+
+exports.getFullSequences = async (req, res) => {
+ 
+  try {
+   
+    const sequences = await sequenceService.getFullSequences();
+    res.status(200).json({
+      success: true,
+      count: sequences.length,
+      data: sequences
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

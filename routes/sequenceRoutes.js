@@ -13,6 +13,7 @@ const {
   deleteCard, // Add this import
   getCardsByUser ,// Add this import
   getUserSequencesAndShared,
+  getFullSequences,
 } = require('../controllers/sequenceController');
 
 const { protect } = require('../middleware/auth');
@@ -33,6 +34,38 @@ router.get('/search', searchSequences);
 
 // User sequences route
 router.get('/user', verifyToken, getUserSequences);
+
+router.get('/full', getFullSequences);
+
+// Main routes
+router.route('/')
+  .get( getSequences)
+  .post(protect, createSequence);
+
+router.route('/:id')
+  .get(getSequence)
+  .put(protect, updateSequence)
+  .delete(protect, deleteSequence);
+
+// Card creation route
+router.post('/create-card', verifyToken, createCard);
+
+// Card search route
+router.get('/search/cards', searchCards);
+
+// Get card by ID route
+router.get('/card/:id', getCardById);
+
+// Add this route for deleting a card
+router.delete('/card/:id', verifyToken, deleteCard);
+
+// Add this route to fetch cards by user ID
+router.get('/cards/user', verifyToken, getCardsByUser);
+
+// Full sequences route
+// router.get('/full', getFullSequences);
+
+
 
 // Main routes
 router.route('/')
