@@ -6,6 +6,8 @@ const pool = require('./config/database');
 const organizationRoutes = require('./routes/organizationRoutes');
 const { connectOpenSearch } = require('./config/opensearch');
 const User = require('./models/User');
+const flowService = require('./services/flowService');
+
 
 
 // Load env vars
@@ -21,9 +23,11 @@ connectOpenSearch().then(async client => {
       // Initialize indices
       // await userService.initIndex();
       // console.log('Users index initialized');
+      console.log('Initializing Flow indices...');
 
       await sequenceService.initIndex();
-      console.log('Sequences index initialized');
+        await flowService.initIndex(); // Initialize flowService indices
+      
     } catch (error) {
     }
   }
@@ -40,6 +44,7 @@ const membershipRoutes = require('./routes/membershipRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const shareRoutes = require('./routes/shareRoutes');
 const userRoutes = require('./routes/userRoutes');
+const rbacRoutes = require('./routes/rbacRoutes');
 
 
 
@@ -100,6 +105,7 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/shares', shareRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/rbac', rbacRoutes);
 
 // Home route
 app.get('/', (req, res) => {
@@ -129,13 +135,14 @@ process.on('unhandledRejection', (err, promise) => {
 });
 (async () => {
   try {
-    const superAdminUser = await User.findByEmail('admin@sequence.com');
+    const superAdminUser = await User.findByEmail('adminNew@sequence.com');
     if (!superAdminUser) {
       await User.create({
         name: 'super admin',
-        email: 'admin@sequence.com',
+        email: 'adminNew@sequence.com',
         password: 'sequenceAdmin123',
-        userType: 'superAdmin'
+        userType: 'superAdmin',
+        role_id: 4
       });
       console.log('Super admin user created');
     } else {

@@ -1,5 +1,6 @@
 const sequenceService = require('../services/sequenceService');
 const cardService = require('../services/cardService');
+const flowService = require('../services/flowService'); // Import flowService
 // import Share model
 const Share = require('../models/Share');
 const Membership = require('../models/Membership');
@@ -564,6 +565,120 @@ exports.getFullSequences = async (req, res) => {
       count: sequences.length,
       data: sequences
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Store flow data (nodes and edges)
+// @route   POST /api/flows
+// @access  Private (or Public, depending on your auth strategy)
+exports.storeFlowData = async (req, res) => {
+  try {
+    const { sequenceId, cleanedNodes, edges } = req.body;
+
+    if (!sequenceId || !nodes || !edges) {
+      return res.status(400).json({
+        success: false,
+        message: 'sequenceId, nodes, and edges are required.'
+      });
+    }
+
+    const result = await flowService.storeFlow({ sequenceId, cleanedNodes, edges });
+
+    if (result.success) {
+      res.status(201).json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Get flow data (nodes and edges) by sequenceId
+// @route   GET /api/flows/:sequenceId
+// @access  Public (or Private, depending on your auth strategy)
+exports.getFlowData = async (req, res) => {
+  try {
+    const { sequenceId } = req.params;
+    // return res.status(200).json({test: true});
+
+    if (!sequenceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'sequenceId is required.'
+      });
+    }
+
+    const result = await flowService.getFlow(sequenceId);
+
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Update flow data (nodes and edges) by sequenceId
+// @route   PUT /api/flows/:sequenceId
+// @access  Private (or Public, depending on your auth strategy)
+exports.updateFlowData = async (req, res) => {
+  try {
+    const { sequenceId } = req.params;
+    const { nodes, edges } = req.body;
+    console.log("data received", {sequenceId, edges, nodes })
+
+    if (!sequenceId || !nodes|| !edges) {
+      return res.status(400).json({
+        success: false,
+        message: 'sequenceId, nodes, and edges are required.'
+      });
+    }
+    // return res.status(200).json({test: nodes});
+
+    // The storeFlow method can be used for updates as it overwrites existing data for a given sequenceId
+    const result = await flowService.updateFlow({ sequenceId, nodes, edges });
+
+    console.log("result ---> ", {result})
+
+
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: `Flow with sequenceId ${sequenceId} updated successfully.`,
+        result: result
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: result.message
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,

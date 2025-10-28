@@ -14,17 +14,13 @@ class Membership {
   }
 
   static async findByUserId(userId) {
-    // const query = `
-    //   SELECT m.*, o.name as organization_name
-    //   FROM memberships m
-    //   LEFT JOIN organizations o ON m.organization_id = o.id
-    //   WHERE m.user_id = $1
-    // `;
-    const query = `SELECT m.*, o.name AS organization_name
-FROM memberships m
-LEFT JOIN organizations o ON m.organization_id = o.id;`;
-    // const result = await pool.query(query, [userId]);
-    const result = await pool.query(query);
+    const query = `
+      SELECT m.*, o.name AS organization_name
+      FROM memberships m
+      LEFT JOIN organizations o ON m.organization_id = o.id
+      WHERE m.user_id = $1
+    `;
+    const result = await pool.query(query, [userId]);
     // console.log(result.rows);
 
     return result.rows;

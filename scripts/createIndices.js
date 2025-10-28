@@ -1,6 +1,9 @@
 const { connectOpenSearch } = require('../config/opensearch');
 const userService = require('../services/userService');
 const sequenceService = require('../services/sequenceService');
+const flowService = require('../services/flowService');
+
+
 
 // Create the indices
 const createIndices = async () => {
@@ -18,6 +21,8 @@ const createIndices = async () => {
     // console.log('Users index created:', userResult);
     
     const sequenceResult = await sequenceService.initIndex();
+
+    await flowService.initIndex();
     // console.log('Sequences index created:', sequenceResult);
     
     process.exit(0);

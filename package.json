@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-indices": "node scripts/createIndices.js",
     "db": "node scripts/setupDatabase.js",
+    "db:open": "NODE_ENV=development node scripts/createIndices.js",
     "db:dev": "NODE_ENV=development node scripts/setupDatabase.js"
   },
   "keywords": [],
@@ -26,6 +27,7 @@
     "nodemailer": "^6.10.1",
     "pg": "^8.16.0",
     "razorpay": "^2.9.6",
+    "sequelize": "^6.37.7",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

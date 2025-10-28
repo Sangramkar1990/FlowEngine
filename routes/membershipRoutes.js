@@ -7,7 +7,8 @@ const membershipRoleController = require('../controllers/membershipRoleControlle
 const router = express.Router();
 
 router.get('/me', protect, getMemberships);
-router.get('/search', membershipController.searchMemberships);
+router.get('/search', protect, membershipController.searchMemberships); // Added protect middleware
+router.get('/organization/:organizationId', protect, membershipController.getMembershipsByOrganizationId); // New route
 router.post('/role', protect, membershipRoleController.updateRole);
 router.get('/', protect, membershipRoleController.getAllMemberships);
 

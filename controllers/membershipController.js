@@ -1,4 +1,5 @@
 const Membership = require('../models/Membership');
+const User = require('../models/User'); // Import the User model
 
 // @desc    Get memberships for the current user
 // @route   GET /api/memberships/me
@@ -36,5 +37,30 @@ exports.searchMemberships = async (req, res) => {
     res.json(memberships);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+// @desc    Get memberships by organization ID
+// @route   GET /api/memberships/organization/:organizationId
+// @access  Private (requires authorization)
+exports.getMembershipsByOrganizationId = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    if (!organizationId) {
+      return res.status(400).json({ success: false, message: 'Organization ID is required' });
+    }
+
+    let memberships = await Membership.findByOrganizationId(organizationId);
+
+    // Fetch user data for each membership
+    const membershipsWithUsers = await Promise.all(memberships.map(async (membership) => {
+      const user = await User.findById(membership.user_id);
+      return { ...membership, user: user ? { id: user.id, name: user.name, email: user.email } : null };
+    }));
+
+    res.status(200).json({ success: true, data: membershipsWithUsers });
+  } catch (error) {
+    console.error('Error fetching memberships by organization ID:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

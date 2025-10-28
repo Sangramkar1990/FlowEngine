@@ -133,7 +133,7 @@ class SequenceService {
       ...sequenceData,
       updatedAt: new Date().toISOString(),
     };
-    // console.log("sequence data in update :", {card: updatedSequence.cards[1]});
+    console.log("sequence data in update :", {card: updatedSequence.cards[1]});
 
     const updatedData = await searchService.updateDocument(
       this.indexName,

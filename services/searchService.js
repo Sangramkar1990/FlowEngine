@@ -126,11 +126,14 @@ class SearchService {
    */
   async indexDocument(indexName, document, id = null) {
     try {
+
+      console.log("indexing id", {id});
       const docId = id || uuidv4();
       const params = {
         index: indexName,
         id: docId,
         body: document,
+        op_type: 'index',
         refresh: true // Make the document immediately available for search
       };
 
@@ -255,6 +258,22 @@ class SearchService {
     };
 
     return this.search(indexName, query, from, size);
+  }
+
+  /**
+   * Refreshes an index to make all operations performed since the last refresh available for search.
+   * @param {string} indexName - Name of the index to refresh.
+   */
+  async refreshIndex(indexName) {
+    try {
+      await this.client.indices.refresh({ index: indexName});
+      const mapping = await this.client.indices.getMapping({ index : indexName });
+console.log(JSON.stringify(mapping, null, 2));
+      console.log(`Index refreshed: ${indexName}`);
+    } catch (error) {
+      console.error(`Error refreshing index ${indexName}: ${error.message}`);
+      throw error;
+    }
   }
 }
 

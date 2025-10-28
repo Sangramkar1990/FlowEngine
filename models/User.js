@@ -1,15 +1,26 @@
 const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Role = require('./Role');
+const RolePermission = require('./RolePermission');
+const Permission = require('./Permission');
 
 class User {
   static async create(userData) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(userData.password, salt);
+    
+    // Determine the role_id based on userType or a default 'user' role
+    let roleId = userData.role_id;
+    if (!roleId) {
+      const defaultRole = await Role.findByName('user');
+      roleId = defaultRole ? defaultRole.id : null;
+    }
+
     const query = `
-      INSERT INTO users (name, email, password, date_of_birth, rank, user_type, organization_name, organization_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING id, name, email, date_of_birth, rank, user_type, organization_name, organization_id, created_at
+      INSERT INTO users (name, email, password, date_of_birth, rank, user_type, organization_name, organization_id, role_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, name, email, date_of_birth, rank, user_type, organization_name, organization_id, role_id, created_at
     `;
     
     const values = [
@@ -20,7 +31,8 @@ class User {
       userData.rank?.toLowerCase() || null,
       userData.userType,
       userData.userType === 'organization' ? userData.organizationName : null,
-      userData.organization_id || null
+      userData.organization_id || null,
+      roleId
     ];
 
     const result = await pool.query(query, values);
@@ -39,14 +51,14 @@ class User {
     return result.rows[0] || null;
   }
 
-  static async updateUserWithOrganization(userId, organizationId, organizationName) {
+  static async updateUserWithOrganization(userId, organizationId, organizationName, roleId = null) {
     const query = `
       UPDATE users 
-      SET organization_id = $1, organization_name = $3, updated_at = CURRENT_TIMESTAMP 
+      SET organization_id = $1, organization_name = $3, role_id = $4, updated_at = CURRENT_TIMESTAMP 
       WHERE id = $2
       RETURNING *
     `;
-    const result = await pool.query(query, [organizationId, userId, organizationName]);
+    const result = await pool.query(query, [organizationId, userId, organizationName, roleId]);
     // console.log("user update result", {result})
     return result.rows[0];
   }
@@ -86,12 +98,12 @@ class User {
   }
 
   static async updateProfile(userId, profileData) {
-    const { name, isoUTCDOB, rank } = profileData;
+    const { name, isoUTCDOB, rank} = profileData;
     const query = `
       UPDATE users
       SET name = $1, date_of_birth = $2, rank = $3, updated_at = CURRENT_TIMESTAMP
       WHERE id = $4
-      RETURNING id, name, email, date_of_birth, rank, user_type, organization_name, organization_id;
+      RETURNING id, name, email, date_of_birth, rank, user_type, organization_name, organization_id, role_id;
     `;
     const values = [name, isoUTCDOB || null, rank?.toLowerCase() || null, userId];
     // return values;
@@ -110,6 +122,29 @@ class User {
       `;
       const result = await pool.query(query, [hashedPassword, userId]);
       return result.rows[0];
+  }
+
+  static async getPermissionsForUser(userId) {
+    const user = await this.findById(userId);
+    if (!user || !user.role_id) {
+      return [];
+    }
+
+    const rolePermissions = await RolePermission.findOne({
+      where: { role_id: user.role_id }
+    });
+
+    if (!rolePermissions || !rolePermissions.permission_ids || rolePermissions.permission_ids.length === 0) {
+      return [];
+    }
+
+    const permissions = await Permission.findAll({
+      where: {
+        id: rolePermissions.permission_ids
+      }
+    });
+
+    return permissions.map(p => p.name);
   }
 }
 

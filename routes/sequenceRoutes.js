@@ -14,6 +14,9 @@ const {
   getCardsByUser ,// Add this import
   getUserSequencesAndShared,
   getFullSequences,
+  storeFlowData, // Import new controller function
+  getFlowData,    // Import new controller function
+  updateFlowData  // Import new controller function
 } = require('../controllers/sequenceController');
 
 const { protect } = require('../middleware/auth');
@@ -36,6 +39,14 @@ router.get('/search', searchSequences);
 router.get('/user', verifyToken, getUserSequences);
 
 router.get('/full', getFullSequences);
+// Flow data routes
+router.route('/flows')
+  .post(protect, storeFlowData); // Use protect middleware if authentication is required
+
+router.route('/flows/:sequenceId')
+  .get(getFlowData)
+  .put(protect, updateFlowData); // Use protect middleware if authentication is required
+
 
 // Main routes
 router.route('/')
@@ -92,7 +103,7 @@ router.delete('/card/:id', verifyToken, deleteCard);
 // Add this route to fetch cards by user ID
 router.get('/cards/user', verifyToken, getCardsByUser);
 
-// ...existing code...
+
 router.get('user/test', verifyToken,getUserSequencesAndShared);
 // ...existing code...
 
