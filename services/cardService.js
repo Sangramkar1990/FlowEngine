@@ -10,9 +10,8 @@ class CardService {
     this.client = createOpenSearchClient();
   }
 
-  async initIndex() {
+   async initIndex() {
     const cardMapping = {
-      mappings: {
       properties: {
         name: { type: 'text' },
         description: { type: 'text' },
@@ -24,7 +23,7 @@ class CardService {
         userName: { type: 'text' },
         sequence_id: { type: 'keyword' },
         createdAt: { type: 'date' }
-      }}
+      }
     };
 
     return searchService.createIndex(this.indexName, cardMapping);

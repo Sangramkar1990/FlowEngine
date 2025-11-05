@@ -19,6 +19,8 @@ class Role {
     return result.rows[0] || null;
   }
 
+  
+
   static async findByName(name, organizationId = null) {
     let query;
     let values;
@@ -39,9 +41,38 @@ class Role {
     if (organizationId !== null) {
       query += ' WHERE organization_id = $1';
       values.push(organizationId);
+    } else {
+      query += ' WHERE organization_id IS NULL'; // Ensure we only get global roles if organizationId is null
     }
     const result = await pool.query(query, values);
     return result.rows;
+  }
+
+  /**
+   * Finds roles for a given organization ID. If no roles are found,
+   * it creates default 'user', 'team lead', and 'admin' roles for that organization.
+   * @param {number} organizationId - The ID of the organization.
+   * @returns {Promise<Array>} - An array of role objects for the specified organization.
+   */
+  static async findOrCreateDefaultRoles(organizationId) {
+    let roles = await this.findAll(organizationId);
+
+    if (roles.length === 0) {
+      console.log(`No roles found for organization ID ${organizationId}. Creating default roles...`);
+      const defaultRoleNames = ['user', 'team lead', 'admin'];
+      const createdRoles = [];
+
+      for (const roleName of defaultRoleNames) {
+        const newRole = await this.create({ name: roleName, organizationId: organizationId });
+        if (newRole) {
+          createdRoles.push(newRole);
+        }
+      }
+      console.log(`Default roles created for organization ID ${organizationId}.`);
+      return createdRoles; // Return the newly created roles
+    }
+
+    return roles; // Return existing roles
   }
 }
 

@@ -30,6 +30,26 @@ class RolePermission {
     const result = await pool.query(query, [roleId]);
     return result.rows.map(row => row.name);
   }
+
+   static async findAll() {
+    const query = 'SELECT * FROM role_permissions';
+    const result = await pool.query(query);
+    return result.rows;
+  }
+
+  /**
+   * Inserts or updates a role-permission mapping.
+   * This method leverages the ON CONFLICT clause in the create method.
+   * @param {object} values - The values to insert or update (e.g., { role_id: 1, permission_ids: [1, 2] }).
+   * @param {object} options - Options for the upsert operation (e.g., { where: { role_id: 1 } }).
+   * @returns {Promise<object>} - The inserted or updated role-permission object.
+   */
+  static async upsert(values, options) {
+    // The existing create method already handles the ON CONFLICT for role_id,
+    // so we can directly call it with the provided values.
+    // The 'options.where' parameter is implicitly handled by the SQL's ON CONFLICT clause.
+    return this.create(values);
+  }
 }
 
 module.exports = RolePermission;

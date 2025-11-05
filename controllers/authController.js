@@ -7,6 +7,7 @@ const Role = require("../models/Role");
 const Permission = require("../models/Permission"); // Added this line
 const RolePermission = require("../models/RolePermission"); // Added this line
 const Membership = require("../models/Membership");
+const { or } = require("sequelize");
 // Helper function to generate a unique alphanumeric string
 const generatePublicId = () => {
   const characters =
@@ -86,7 +87,14 @@ exports.register = async (req, res) => {
         userId: user.id,
         publicId, // Pass publicId to Organization.create
       });
-      await User.updateUserWithOrganization(user.id, organization.id);
+
+      const organizationRole = await Role.findOrCreateDefaultRoles( organization.id);
+
+      const adminRole = organizationRole.find(role => role.name === 'admin');
+
+
+
+      await User.updateUserWithOrganization(user.id, organization.id, organization.name, adminRole.id);
     }
 
     res.status(201).json({

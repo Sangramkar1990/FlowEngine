@@ -6,13 +6,21 @@ const pool = require('./config/database');
 const organizationRoutes = require('./routes/organizationRoutes');
 const { connectOpenSearch } = require('./config/opensearch');
 const User = require('./models/User');
+const Role = require('./models/Role');
+const Permission = require('./models/Permission');
+const RolePermission = require('./models/RolePermission');
 const flowService = require('./services/flowService');
+const sequenceService = require('./services/sequenceService');
+const cardService = require('./services/cardService');
+const seedRoles = require('./scripts/seedRoles')
+const seedPermissions = require('./scripts/seedPermissions');
+const seedRolePermissions = require('./scripts/seedRolePermissions');
 
 
 
 // Load env vars
 dotenv.config();
-console.log("node env :", {env:process.env.NODE_ENV})
+console.log("node env :", {test: (process.env.NODE_ENV || "").trim() === "development" ? process.env.OPNESEARCH_DEV_NODE  :"http://opensearch:9200"})
 connectOpenSearch().then(async client => {
   // console.log( process.env.NODE_ENV.length )
   // console.log('development'.length )
@@ -26,6 +34,7 @@ connectOpenSearch().then(async client => {
       console.log('Initializing Flow indices...');
 
       await sequenceService.initIndex();
+      await cardService.initIndex();
         await flowService.initIndex(); // Initialize flowService indices
       
     } catch (error) {
@@ -135,19 +144,36 @@ process.on('unhandledRejection', (err, promise) => {
 });
 (async () => {
   try {
-    const superAdminUser = await User.findByEmail('adminNew@sequence.com');
-    if (!superAdminUser) {
-      await User.create({
-        name: 'super admin',
-        email: 'adminNew@sequence.com',
-        password: 'sequenceAdmin123',
-        userType: 'superAdmin',
-        role_id: 4
-      });
-      console.log('Super admin user created');
-    } else {
-      console.log('Super admin user already exists');
-    }
+    // const superAdminUser = await User.findByEmail('adminNew@sequence.com');
+    // Run role seeding
+    await seedRoles();
+    await seedPermissions();
+    await seedRolePermissions();
+    let roles = await Role.findAll();
+    let permissions = await Permission.findAll();
+    let rolePermissions = await RolePermission.findAll();
+    console.log("roles", {roles});
+    console.log("permissions", {permissions});
+    console.log("rolePermissions", {rolePermissions});
+    // if (roles.length === 0) {
+    //   // Create default roles
+    //   const defaultRoles = [ 'user', 'team', 'manager', 'super admin' ];
+    //   for (const roleName of defaultRoles) {
+    //     await Role.create({ name: roleName });
+    //     console.log(`Role '${roleName}' created`);
+    //   }
+    
+    // if (!superAdminUser) {
+    //   await User.create({
+    //     name: 'super admin',
+    //     email: 'adminNew@sequence.com',
+    //     password: 'sequenceAdmin123',
+    //     role_id: 4
+    //   });
+    //   console.log('Super admin user created');
+    // } else {
+    //   console.log('Super admin user already exists');
+    // }
   } catch (e) {
     console.error('Error checking/creating super admin user:', e);
   }

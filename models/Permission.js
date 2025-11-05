@@ -30,6 +30,25 @@ class Permission {
     const result = await pool.query(query);
     return result.rows;
   }
+
+  /**
+   * Finds a permission by criteria, or creates it if it doesn't exist.
+   * @param {object} options - Options object.
+   * @param {object} options.where - Criteria to find the permission (e.g., { name: 'permission_name' }).
+   * @param {object} options.defaults - Default values to use if the permission needs to be created.
+   * @returns {Promise<Array>} - An array containing the permission object and a boolean indicating if it was created.
+   */
+  static async findOrCreate({ where, defaults }) {
+    let permission = await this.findByName(where.name);
+    let created = false;
+
+    if (!permission) {
+      permission = await this.create(defaults);
+      created = true;
+    }
+
+    return [permission, created];
+  }
 }
 
 module.exports = Permission;

@@ -18,9 +18,9 @@ class User {
     }
 
     const query = `
-      INSERT INTO users (name, email, password, date_of_birth, rank, user_type, organization_name, organization_id, role_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING id, name, email, date_of_birth, rank, user_type, organization_name, organization_id, role_id, created_at
+      INSERT INTO users (name, email, password, date_of_birth, rank, organization_name, organization_id, role_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id, name, email, date_of_birth, rank, organization_name, organization_id, role_id, created_at
     `;
     
     const values = [
@@ -29,7 +29,6 @@ class User {
       hashedPassword,
       userData.dateOfBirth || null,
       userData.rank?.toLowerCase() || null,
-      userData.userType,
       userData.userType === 'organization' ? userData.organizationName : null,
       userData.organization_id || null,
       roleId
