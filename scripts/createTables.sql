@@ -343,7 +343,7 @@ CREATE TABLE IF NOT EXISTS team_members (
 
 CREATE TABLE IF NOT EXISTS shares (
   id SERIAL PRIMARY KEY,
-  sequence_id INTEGER UNIQUE REFERENCES sequences(id) ON DELETE CASCADE,
+  sequence_id TEXT UNIQUE ,
   name VARCHAR(255) NOT NULL,
   entire_org BOOLEAN DEFAULT TRUE,
   organization_id INTEGER REFERENCES organizations(id),
