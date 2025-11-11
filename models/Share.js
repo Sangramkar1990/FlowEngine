@@ -2,6 +2,7 @@ const pool = require('../config/database');
 
 class Share {
   static async create({ sequence_id, name, entire_org = true, organization_id, team_ids = [] }) {
+    // return true;
     const query = `
       INSERT INTO shares (sequence_id, name, entire_org, organization_id, team_ids)
       VALUES ($1, $2, $3, $4, $5)
@@ -34,6 +35,11 @@ class Share {
     `;
     const result = await pool.query(query, [name, entire_org, team_ids, sequence_id]);
     return result.rows[0];
+  }
+  static async findByOrganizationIdAndEntireOrg(organizationId) {
+    const query = 'SELECT * FROM shares WHERE organization_id = $1 AND entire_org = TRUE';
+    const result = await pool.query(query, [organizationId]);
+    return result.rows;
   }
 }
 

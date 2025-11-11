@@ -88,13 +88,29 @@ exports.register = async (req, res) => {
         publicId, // Pass publicId to Organization.create
       });
 
+      console.log("organization created :", { organization , id: organization.id
+      });
+
       const organizationRole = await Role.findOrCreateDefaultRoles( organization.id);
 
       const adminRole = organizationRole.find(role => role.name === 'admin');
 
+      let allOrgRoles = await Role.findAll(organization.id);
+      await RolePermission.assignNewRolePermissonOrg(allOrgRoles.map(r => r.id));
+      let allPermissions = await Permission.findAll();
+      let allRolePermissions = await RolePermission.findAll();
+
+      console.log('all roles and permissions', {allPermissions, allOrgRoles, allRolePermissions, organizationRole, adminRole});
+
+
 
 
       await User.updateUserWithOrganization(user.id, organization.id, organization.name, adminRole.id);
+      // await Membership.create({
+      //   organization_id: organization.id,
+      //   user_id: user.id,
+      //   role: 'admin',
+      // });
     }
 
     res.status(201).json({
@@ -175,6 +191,22 @@ exports.getMe = async (req, res) => {
     userData.DOB = `${year}-${month}-${day}`;
     const role = await Role.findById(req.user.role_id);
     const permission = await RolePermission.getPermissionsForRole(req.user.role_id);
+    // let membership = {};
+    let adminMembership = {};
+    if (role.name === 'admin'){
+      const organization = await Organization.findById(role.organization_id);
+      const otherMembers = await Membership.findOtherMembersByOrganizationId(role.organization_id);
+      adminMembership = [...otherMembers,{
+        id : organization.id,
+        organization_name: organization?.name ? organization.name : null,
+        role: role.name ? role.name : null,
+        joined_at: organization?.created_at ? organization.created_at : null
+      }
+      ]
+      
+
+    }
+    
     const membership = await Membership.findByUserId(req.user.id);
 
     userData.role = role?.name ? role.name : null;
@@ -207,7 +239,8 @@ exports.getMe = async (req, res) => {
           ...userData,
           id: req.user.id,
           role: role.name ? role.name : null,
-          permissions: permission
+          permissions: permission,
+          membership: adminMembership
         },
       });
     }

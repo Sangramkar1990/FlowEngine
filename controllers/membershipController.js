@@ -1,5 +1,6 @@
 const Membership = require('../models/Membership');
 const User = require('../models/User'); // Import the User model
+const Role = require('../models/Role'); // Import the Role model
 
 // @desc    Get memberships for the current user
 // @route   GET /api/memberships/me
@@ -61,6 +62,48 @@ exports.getMembershipsByOrganizationId = async (req, res) => {
     res.status(200).json({ success: true, data: membershipsWithUsers });
   } catch (error) {
     console.error('Error fetching memberships by organization ID:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+// @desc    Get all memberships for a given organization from req.user
+// @route   GET /api/memberships/organization/all
+// @access  Private (requires authorization)
+exports.getAllMembershipByOrganization = async (req, res) => {
+  try {
+    let organizationId = null;
+    // if user is admin
+    organizationId = req.user.organization_id;
+    
+   
+      // return res.status(400).json({ success: false, message:  membership[0].organization_id });
+    
+
+    if (!organizationId) {
+       const membership = await Membership.findByUserId(req.user.id);
+      if(!membership || !membership[0].organization_id ){
+        return res.status(403).json({ success: false, message: 'Unauthorized to view all memberships' });
+      }
+      else{
+        organizationId = membership[0].organization_id;
+      }
+    }
+    // return res.status(400).json({ success: false, message: organizationId });
+
+    const memberships = await Membership.findAllMembershipsWithUserData(organizationId);
+    // return res.status(300).json({ success: true, data: memberships});
+    
+    const roles = await Role.findAll(organizationId);
+    const membershipsWithUsersAndRoles = await Promise.all(memberships.map(async (membership) => {
+      const user = await User.findById(membership.user_id);
+      const role = roles.find(r => r.id === user.role_id);
+      return { ...membership, user: user ? { id: user.id, name: user.name, email: user.email, role: role ? { id: role.id, name: role.name } : null } : null };
+    }));
+
+
+    res.status(200).json({ success: true, data: membershipsWithUsersAndRoles, roles });
+  } catch (error) {
+    console.error('Error fetching all memberships by organization:', error.message);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

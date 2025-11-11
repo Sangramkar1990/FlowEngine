@@ -50,6 +50,44 @@ class RolePermission {
     // The 'options.where' parameter is implicitly handled by the SQL's ON CONFLICT clause.
     return this.create(values);
   }
+  /**
+   * Assigns permissions from global roles (role_id 1, 2, 3) to new organization-specific roles.
+   * @param {Array<number>} newRoleIds - An array containing three new role IDs for user, team lead, and admin.
+   * @returns {Promise<boolean>} - True if permissions are successfully assigned.
+   */
+  static async assignNewRolePermissonOrg(newRoleIds) {
+    if (!Array.isArray(newRoleIds) || newRoleIds.length !== 3) {
+      throw new Error("newRoleIds must be an array of 3 role IDs.");
+    }
+
+    // Get permissions for global roles (assuming role_id 1, 2, 3 are global user, team lead, admin respectively)
+    const globalUserRolePermissions = await this.findByRoleId(1);
+    const globalTeamLeadRolePermissions = await this.findByRoleId(2);
+    const globalAdminRolePermissions = await this.findByRoleId(3);
+
+    // Assign permissions to the new organization's roles
+    if (globalUserRolePermissions) {
+      await this.upsert({
+        role_id: newRoleIds[0], // New user role
+        permission_ids: globalUserRolePermissions.permission_ids,
+      });
+    }
+    if (globalTeamLeadRolePermissions) {
+      await this.upsert({
+        role_id: newRoleIds[1], // New team lead role
+        permission_ids: globalTeamLeadRolePermissions.permission_ids,
+      });
+    }
+    if (globalAdminRolePermissions) {
+      await this.upsert({
+        role_id: newRoleIds[2], // New admin role
+        permission_ids: globalAdminRolePermissions.permission_ids,
+      });
+    }
+
+    return true;
+  }
+
 }
 
 module.exports = RolePermission;

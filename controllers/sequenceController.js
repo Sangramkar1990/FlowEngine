@@ -1,58 +1,60 @@
-const sequenceService = require('../services/sequenceService');
-const cardService = require('../services/cardService');
-const flowService = require('../services/flowService'); // Import flowService
+const sequenceService = require("../services/sequenceService");
+const cardService = require("../services/cardService");
+const flowService = require("../services/flowService"); // Import flowService
 // import Share model
-const Share = require('../models/Share');
-const Membership = require('../models/Membership');
-const TeamMember = require('../models/TeamMember');
-const Team = require('../models/Team');
-
+const Share = require("../models/Share");
+const Membership = require("../models/Membership");
+const TeamMember = require("../models/TeamMember");
+const Team = require("../models/Team");
 
 // @desc    Get all sequences
 // @route   GET /api/sequences
 // @access  Public
-exports.getSequences = async (req, res) => {
-  // return { test: true } ;
-  try {
+// exports.getSequences = async (req, res) => {
+//   // return { test: true } ;
+//   try {
+//     // Add query parameters for filtering
+//     const userId = req.user.id;
+//     return userId;
+//     const { type, effective, user } = req.query;
+//     const page = parseInt(req.query.page, 10) || 1;
+//     const limit = parseInt(req.query.limit, 10) || 10;
 
-    // Add query parameters for filtering
-    const { type, effective, user } = req.query;
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+//     // Build filters
+//     const filters = {};
 
-    // Build filters
-    const filters = {};
+//     if (type) {
+//       filters.type = type;
+//     }
 
-    if (type) {
-      filters.type = type;
-    }
+//     if (effective) {
+//       filters.effective = effective;
+//     }
 
-    if (effective) {
-      filters.effective = effective;
-    }
+//     if (user) {
+//       filters.user = user;
+//     }
 
-    if (user) {
-      filters.user = user;
-    }
+//     // Get sequences with pagination
+//     const result = await sequenceService.getSequences(filters, page, limit, userId);
 
-    // Get sequences with pagination
-    const result = await sequenceService.getSequences(filters, page, limit);
+//     return res.status(200).json({result});
 
-    // console.log("result:", result);
+//     // console.log("result:", result);
 
-    res.status(200).json({
-      success: true,
-      count: result.sequences.length,
-      pagination: result.pagination,
-      data: result.sequences
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+//     // res.status(200).json({
+//     //   success: true,
+//     //   count: result.sequences.length,
+//     //   pagination: result.pagination,
+//     //   data: result.sequences,
+//     // });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 // @desc    Get single sequence
 // @route   GET /api/sequences/:id
@@ -62,27 +64,26 @@ exports.getSequenceTest = async (req, res) => {
   try {
     const sequence = await sequenceService.getSequence(req.params.id);
 
-    res.status(200).json({sequence: sequence});
-
+    res.status(200).json({ sequence: sequence });
 
     if (!sequence) {
       return res.status(404).json({
         success: false,
-        message: 'Sequence not found'
+        message: "Sequence not found",
       });
     }
 
     const card = await cardService.getBySequenceId(req.params.id);
 
-  const response = {
-    success: true,
-    test: true,
-    data: sequence,
-    cardPresent: card != null,          // boolean flag
-    ...(card ? { share: card.share } : {}) // add share only if card exists
-  };
+    const response = {
+      success: true,
+      test: true,
+      data: sequence,
+      cardPresent: card != null, // boolean flag
+      ...(card ? { share: card.share } : {}), // add share only if card exists
+    };
 
-  res.status(200).json(response);
+    res.status(200).json(response);
 
     // res.status(200).json({
     //   success: true,
@@ -92,7 +93,7 @@ exports.getSequenceTest = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -102,16 +103,19 @@ exports.getSequenceTest = async (req, res) => {
 // @access  Private
 exports.createSequence = async (req, res) => {
   try {
-    const sequence = await sequenceService.createSequence(req.body, req.user.id);
+    const sequence = await sequenceService.createSequence(
+      req.body,
+      req.user.id
+    );
 
     res.status(201).json({
       success: true,
-      data: sequence
+      data: sequence,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -119,9 +123,11 @@ exports.createSequence = async (req, res) => {
 // @desc    Get all sequences
 // @route   GET /api/sequences
 // @access  Public
-exports.getSequences = async (req, res) => {
+exports.getSequences_old = async (req, res) => {
   try {
     const { user } = req.query;
+    const userId = req.user.id;
+    // return res.status(200).json({user: req.user.id});
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
 
@@ -130,18 +136,21 @@ exports.getSequences = async (req, res) => {
 
     // console.log("user:", {user: req.user.id});
 
-    const result = await sequenceService.getSequences(filters, page, limit);
+    const result = await sequenceService.getSequences(filters, page, limit, userId);
+
+    
+    //  return res.status(200).json({user: result});
 
     res.status(200).json({
       success: true,
       count: result.sequences.length,
       pagination: result.pagination,
-      data: result.sequences
+      data: result.sequences,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -150,16 +159,13 @@ exports.getSequences = async (req, res) => {
 // @route   GET /api/sequences/:id
 // @access  Public
 exports.getSequence = async (req, res) => {
-
   try {
     const sequence = await sequenceService.getSequence(req.params.id);
     // return false;
-
-    
     if (!sequence) {
       return res.status(404).json({
         success: false,
-        message: 'Sequence not found'
+        message: "Sequence not found",
       });
     }
 
@@ -169,16 +175,15 @@ exports.getSequence = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      
+
       data: {
-        ...sequence
-        
-      }
+        ...sequence,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -199,26 +204,26 @@ exports.updateSequence = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: sequence_get
+      data: sequence_get,
     });
   } catch (error) {
-    if (error.message === 'Sequence not found') {
+    if (error.message === "Sequence not found") {
       return res.status(404).json({
         success: false,
-        message: 'Sequence not found'
+        message: "Sequence not found",
       });
     }
 
-    if (error.message === 'Not authorized to update this sequence') {
+    if (error.message === "Not authorized to update this sequence") {
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to update this sequence'
+        message: "Not authorized to update this sequence",
       });
     }
 
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -233,26 +238,26 @@ exports.deleteSequence = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: {}
+data: {},
     });
   } catch (error) {
-    if (error.message === 'Sequence not found') {
+    if (error.message === "Sequence not found") {
       return res.status(404).json({
         success: false,
-        message: 'Sequence not found'
+        message: "Sequence not found",
       });
     }
 
-    if (error.message === 'Not authorized to delete this sequence') {
+    if (error.message === "Not authorized to delete this sequence") {
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to delete this sequence'
+        message: "Not authorized to delete this sequence",
       });
     }
 
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -267,7 +272,7 @@ exports.searchSequences = async (req, res) => {
     if (!query) {
       return res.status(400).json({
         success: false,
-        message: 'Search query is required'
+        message: "Search query is required",
       });
     }
 
@@ -281,12 +286,12 @@ exports.searchSequences = async (req, res) => {
     res.status(200).json({
       success: true,
       count: results.hits.length,
-      data: results.hits
+      data: results.hits,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -310,33 +315,29 @@ exports.getUserSequences = async (req, res) => {
       // get team Id from teamMember model using membershipId
       const teamMember = await TeamMember.findByMembershipId(membershipId);
       if (teamMember && teamMember.length > 0) {
-
         let teamId = teamMember[0].team_id;
         // get shares by team_id
         const shares = await Share.findByTeamId(teamId);
         if (shares && shares.length > 0) {
-           console.log("shares:", shares);
-        
-        console.log("team id:", teamMember[0].team_id);
-      // console.log("membership:", membership[0].id);
+          console.log("shares:", shares);
+
+          console.log("team id:", teamMember[0].team_id);
+          // console.log("membership:", membership[0].id);
         }
       }
-
     }
-
-
 
     // console.log("memberships:", membership.id);
 
     res.status(200).json({
       success: true,
       count: sequences.length,
-      data: sequences
+      data: sequences,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -365,13 +366,14 @@ exports.getUserSequences = async (req, res) => {
 // @access  Private
 exports.createCard = async (req, res) => {
   try {
-    const { video, name, type, effect, description, sequence_id, difficulty } = req.body;
+    const { video, name, type, effect, description, sequence_id, difficulty } =
+      req.body;
 
     // Validate required fields
     if (!name || !type || !description) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, type and description'
+        message: "Please provide name, type and description",
       });
     }
 
@@ -390,12 +392,12 @@ exports.createCard = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: card
+      data: card,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -412,7 +414,7 @@ exports.searchCards = async (req, res) => {
     if (!query) {
       return res.status(400).json({
         success: false,
-        message: 'Search query is required'
+        message: "Search query is required",
       });
     }
 
@@ -422,12 +424,12 @@ exports.searchCards = async (req, res) => {
       success: true,
       count: result.cards.length,
       pagination: result.pagination,
-      data: result.cards
+      data: result.cards,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -441,18 +443,18 @@ exports.getCardById = async (req, res) => {
     if (!card) {
       return res.status(404).json({
         success: false,
-        message: 'Card not found'
+        message: "Card not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: card
+      data: card,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -465,11 +467,18 @@ exports.deleteCard = async (req, res) => {
     await cardService.deleteCard(req.params.id, req.user.id);
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
-    if (error.message === 'Card not found') {
-      return res.status(404).json({ success: false, message: 'Card not found' });
+    if (error.message === "Card not found") {
+      return res
+        .status(404)
+        .json({ success: false, message: "Card not found" });
     }
-    if (error.message === 'Not authorized to delete this card') {
-      return res.status(401).json({ success: false, message: 'Not authorized to delete this card' });
+    if (error.message === "Not authorized to delete this card") {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Not authorized to delete this card",
+        });
     }
     res.status(400).json({ success: false, message: error.message });
   }
@@ -479,96 +488,90 @@ exports.deleteCard = async (req, res) => {
 // @route   GET /api/sequences/cards/user/me
 // @access  Private
 exports.getCardsByUser = async (req, res) => {
-    try {
-        const userId = req.user.id; // Extract user ID from token
-        const cards = await cardService.getCardByUser(userId);
-        res.status(200).json({
-            success: true,
-            data: cards
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
-// 1. User Sequences API
-exports.getUserSequencesAndShared = async (req, res) => {
-  try{
-
-      
-  const userId = req.params.userId;
-  // Get memberships for user
-  const memberships = await Membership.findByUserId(userId);
-
-  let sharedSequences = [];
-  for (const membership of memberships) {
-    const teamMemberships = await TeamMember.getTeamsForMembership(membership.id);
-    for (const tm of teamMemberships) {
-      const team_id = tm.team_id;
-      const shares = await Share.findByTeamId(team_id);
-      for (const share of shares) {
-        const sequence = await sequenceService.getSequence(share.sequence_id);
-        // Get team name if needed
-        let groupName = team_id;
-        if (Team && Team.getById) {
-          const team = await Team.getById(team_id);
-          groupName = team ? team.name : team_id;
-        }
-        sharedSequences.push({
-          ...sequence,
-          share: true,
-          groupName
-        });
-      }
-    }
-  }
-   // Sequences created by user
-  const createdSequences = await sequenceService.getUserSequences(userId);
-  const createdFormatted = createdSequences.map(seq => ({
-    ...seq,
-    share: false
-  }));
-
-  // Merge and deduplicate by sequence id
-  const allSequences = [...createdFormatted, ...sharedSequences];
-  const uniqueSequences = [];
-  const seen = new Set();
-  for (const seq of allSequences) {
-    if (!seen.has(seq.id)) {
-      uniqueSequences.push(seq);
-      seen.add(seq.id);
-    }
-  }
-
-  res.json(uniqueSequences);
-
-  }
-  catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-  
-}
-}
-
-
-exports.getFullSequences = async (req, res) => {
- 
   try {
-   
-    const sequences = await sequenceService.getFullSequences();
+    const userId = req.user.id; // Extract user ID from token
+    const cards = await cardService.getCardByUser(userId);
     res.status(200).json({
       success: true,
-      count: sequences.length,
-      data: sequences
+      data: cards,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
+    });
+  }
+};
+// 1. User Sequences API
+exports.getUserSequencesAndShared = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    // Get memberships for user
+    const memberships = await Membership.findByUserId(userId);
+
+    let sharedSequences = [];
+    for (const membership of memberships) {
+      const teamMemberships = await TeamMember.getTeamsForMembership(
+        membership.id
+      );
+      for (const tm of teamMemberships) {
+        const team_id = tm.team_id;
+        const shares = await Share.findByTeamId(team_id);
+        for (const share of shares) {
+          const sequence = await sequenceService.getSequence(share.sequence_id);
+          // Get team name if needed
+          let groupName = team_id;
+          if (Team && Team.getById) {
+            const team = await Team.getById(team_id);
+            groupName = team ? team.name : team_id;
+          }
+          sharedSequences.push({
+            ...sequence,
+            share: true,
+            groupName,
+          });
+        }
+      }
+    }
+    // Sequences created by user
+    const createdSequences = await sequenceService.getUserSequences(userId);
+    const createdFormatted = createdSequences.map((seq) => ({
+      ...seq,
+      share: false,
+    }));
+
+    // Merge and deduplicate by sequence id
+    const allSequences = [...createdFormatted, ...sharedSequences];
+    const uniqueSequences = [];
+    const seen = new Set();
+    for (const seq of allSequences) {
+      if (!seen.has(seq.id)) {
+        uniqueSequences.push(seq);
+        seen.add(seq.id);
+      }
+    }
+
+    res.json(uniqueSequences);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getFullSequences = async (req, res) => {
+  try {
+    const sequences = await sequenceService.getFullSequences();
+    res.status(200).json({
+      success: true,
+      count: sequences.length,
+      data: sequences,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -583,27 +586,31 @@ exports.storeFlowData = async (req, res) => {
     if (!sequenceId || !nodes || !edges) {
       return res.status(400).json({
         success: false,
-        message: 'sequenceId, nodes, and edges are required.'
+        message: "sequenceId, nodes, and edges are required.",
       });
     }
 
-    const result = await flowService.storeFlow({ sequenceId, cleanedNodes, edges });
+    const result = await flowService.storeFlow({
+      sequenceId,
+      cleanedNodes,
+      edges,
+    });
 
     if (result.success) {
       res.status(201).json({
         success: true,
-        message: result.message
+        message: result.message,
       });
     } else {
       res.status(500).json({
         success: false,
-        message: result.message
+        message: result.message,
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -619,7 +626,7 @@ exports.getFlowData = async (req, res) => {
     if (!sequenceId) {
       return res.status(400).json({
         success: false,
-        message: 'sequenceId is required.'
+        message: "sequenceId is required.",
       });
     }
 
@@ -628,18 +635,18 @@ exports.getFlowData = async (req, res) => {
     if (result.success) {
       res.status(200).json({
         success: true,
-        data: result.data
+        data: result.data,
       });
     } else {
       res.status(404).json({
         success: false,
-        message: result.message
+        message: result.message,
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -651,12 +658,12 @@ exports.updateFlowData = async (req, res) => {
   try {
     const { sequenceId } = req.params;
     const { nodes, edges } = req.body;
-    console.log("data received", {sequenceId, edges, nodes })
+    console.log("data received", { sequenceId, edges, nodes });
 
-    if (!sequenceId || !nodes|| !edges) {
+    if (!sequenceId || !nodes || !edges) {
       return res.status(400).json({
         success: false,
-        message: 'sequenceId, nodes, and edges are required.'
+        message: "sequenceId, nodes, and edges are required.",
       });
     }
     // return res.status(200).json({test: nodes});
@@ -664,25 +671,217 @@ exports.updateFlowData = async (req, res) => {
     // The storeFlow method can be used for updates as it overwrites existing data for a given sequenceId
     const result = await flowService.updateFlow({ sequenceId, nodes, edges });
 
-    console.log("result ---> ", {result})
-
+    console.log("result ---> ", { result });
 
     if (result.success) {
       res.status(200).json({
         success: true,
         message: `Flow with sequenceId ${sequenceId} updated successfully.`,
-        result: result
+        result: result,
       });
     } else {
       res.status(500).json({
         success: false,
-        message: result.message
+        message: result.message,
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
+    });
+  }
+};
+
+// @desc    Get all cards
+// @route   GET /api/sequences/cards/all
+// @access  Public
+exports.getAllCards = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100;
+
+    const result = await cardService.getAllCards(page, limit);
+
+    res.status(200).json({
+      success: true,
+      count: result.cards.length,
+      pagination: result.pagination,
+      data: result.cards,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc    Partially update a card
+// @route   PATCH /api/sequences/card/:id
+// @access  Private
+exports.patchCard = async (req, res) => {
+  try {
+    const cardId = req.params.id;
+    const userId = req.user.id;
+    // return res.status(400).json({
+    //   success: false,
+    //   message: {cardId, userId}
+    // });
+
+    // Get the existing card to check ownership
+    const existingCard = await cardService.getCard(cardId);
+    //  return res.status(400).json({
+    //   success: false,
+    //   message: {userid :existingCard.card.user}
+    // });
+
+
+    if (!existingCard) {
+      return res.status(404).json({
+        success: false,
+        message: "Card not found",
+      });
+    }
+
+    // Check if the requesting user is the owner of the card
+    if (existingCard.card.user !== userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized to update this card",
+      });
+    }
+
+    const updatedCard = await cardService.patchCard(cardId, req.body, userId);
+
+    res.status(200).json({
+      success: true,
+      data: updatedCard
+    });
+  } catch (error) {
+    if (error.message === "Card not found") {
+      return res
+        .status(404)
+        .json({ success: false, message: "Card not found" });
+    }
+    if (error.message === "Not authorized to update this card") {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Not authorized to update this card",
+        });
+    }
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get all sequences
+// @route   GET /api/sequences
+// @access  Public
+exports.getSequences = async (req, res) => {
+  try {
+    const { user } = req.query;
+    const userId = req.user.id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    const filters = {};
+    if (user) filters.user = user;
+
+    // Get sequences created by the user (fetch all to combine before pagination)
+    const createdSequencesResult = await sequenceService.getSequences(filters, 1, 10000, userId); // Fetch a large number to get all
+    let allSequences = createdSequencesResult.sequences.map(seq => ({ ...seq, isShared: false }));
+
+    // Get memberships and teams for the user
+    const membershipsAndTeams = await Membership.findMembershipAndTeamByUserId(userId);
+
+    let sharedSequences = [];
+    for (const membershipTeam of membershipsAndTeams) {
+      const team_id = membershipTeam.team_id;
+      const shares = await Share.findByTeamId(team_id);
+      for (const share of shares) {
+        const sharedSequence = await sequenceService.getSequence(share.sequence_id);
+        if (sharedSequence) {
+          sharedSequences.push({ ...sharedSequence, isShared: true, sharedByTeam: team_id });
+        }
+      }
+    }
+
+    // Add organization-wide shared sequences
+    if (membershipsAndTeams.length > 0 && membershipsAndTeams[0].organization_id) {
+      const organizationId = membershipsAndTeams[0].organization_id;
+      const orgShares = await Share.findByOrganizationIdAndEntireOrg(organizationId);
+      for (const orgShare of orgShares) {
+        const sharedSequence = await sequenceService.getSequence(orgShare.sequence_id);
+        if (sharedSequence) {
+          sharedSequences.push({
+            ...sharedSequence,
+            isShared: true,
+            groupName: 'Organization Shared',
+            membership: membershipsAndTeams[0], // Associate with the first membership for context
+          });
+        }
+      }
+    }
+     allSequences = [...allSequences, ...sharedSequences];
+
+    // Combine and deduplicate sequences
+    const uniqueSequencesMap = new Map();
+    allSequences.forEach(seq => uniqueSequencesMap.set(seq.id, seq));
+    sharedSequences.forEach(seq => {
+      if (!uniqueSequencesMap.has(seq.id)) {
+        uniqueSequencesMap.set(seq.id, seq);
+      }
+    });
+
+    const finalSequences = Array.from(uniqueSequencesMap.values());
+
+    // Apply pagination to the combined, deduplicated list
+    const total = finalSequences.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedSequences = finalSequences.slice(startIndex, endIndex);
+
+    res.status(200).json({
+      success: true,
+      count: paginatedSequences.length,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+      data: paginatedSequences,
+      membership: membershipsAndTeams
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// @desc    Get all sequences for the authenticated user
+// @route   GET /api/sequences/my-sequences
+// @access  Private
+exports.mySequences = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    const result = await sequenceService.getSequences({}, page, limit, userId);
+
+    res.status(200).json({
+      success: true,
+      count: result.sequences.length,
+      pagination: result.pagination,
+      data: result.sequences,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

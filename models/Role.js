@@ -9,6 +9,7 @@ class Role {
       RETURNING id, name, organization_id, created_at, updated_at;
     `;
     const values = [roleData.name, roleData.organizationId || null];
+    console.log("Creating role with values:", values);
     const result = await pool.query(query, values);
     return result.rows[0];
   }
@@ -47,6 +48,19 @@ class Role {
     const result = await pool.query(query, values);
     return result.rows;
   }
+
+  // static async findAll(organizationId = null) {
+  //   let query = 'SELECT * FROM roles';
+  //   let values = [];
+  //   if (organizationId !== null) {
+  //     query += ' WHERE organization_id = $1';
+  //     values.push(organizationId);
+  //   } else {
+  //     query += ' WHERE organization_id IS NULL'; // Ensure we only get global roles if organizationId is null
+  //   }
+  //   const result = await pool.query(query, values);
+  //   return result.rows;
+  // }
 
   /**
    * Finds roles for a given organization ID. If no roles are found,

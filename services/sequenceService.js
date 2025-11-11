@@ -22,13 +22,18 @@ class SequenceService {
     return searchService.createIndex(this.indexName, sequenceMapping);
   }
 
-  async getSequences(filters = {}, page = 1, limit = 10) {
+  async getSequences(filters = {}, page = 1, limit = 10, userId = null) {
     const from = (page - 1) * limit;
     const must = [];
 
-    if (filters.user) {
+    
+
+    if (userId) {
+      must.push({ term: { user: userId } });
+    } else if (filters.user) {
       must.push({ term: { user: filters.user } });
     }
+    // return must;
 
     const query = must.length > 0 ? { bool: { must } } : { match_all: {} };
 

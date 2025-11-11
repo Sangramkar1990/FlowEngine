@@ -1,12 +1,15 @@
 const InviteRequest = require('../models/inviteRequest');
 const Organization = require('../models/Organization');
 const Membership = require('../models/Membership');
+const Role = require('../models/Role'); // Import the Role model
+const User = require('../models/User'); // Import the User model
 // @desc    Create an invite request
 // @route   POST /api/invite-requests
 // @access  Private
 exports.createInviteRequest = async (req, res) => {
   try {
-    const { organizationId, userId } = req.body;
+    const { organizationId } = req.body;
+    const  userId  = req.user.id;
     const inviteRequest = await InviteRequest.create(organizationId, userId);
     res.status(201).json({ success: true, data: inviteRequest });
   } catch (error) {
@@ -34,9 +37,15 @@ exports.updateInviteRequestStatus = async (req, res) => {
 
     const updatedRequest = await InviteRequest.updateStatus(id, status);
 
+    const updatedRoleForUser = await Role.findByName('user', inviteRequest.organization_id);
+    console.log("updatedRoleForUser", {updatedRoleForUser});
+
+
     if (status === 2) {
       // Create a membership if the invite request is approved
      const updatedmember =  await Membership.create(inviteRequest.user_id, inviteRequest.organization_id, 'user');
+     await User.updateUserRole(inviteRequest.user_id, updatedRoleForUser.id);
+
      res.json({success: true, data: updatedmember}); 
     }
 

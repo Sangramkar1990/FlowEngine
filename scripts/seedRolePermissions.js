@@ -29,11 +29,11 @@ async function seedRolePermissions() {
       ],
       'team lead': [
         'view_sequence', 'view_techniques', 'view_teams', 'view_organization',
-        'manage_sequence', 'manage_teams', 'share_sequence'
+        'manage_sequence', 'manage_teams', 'share_sequence', 'manage_techniques'
       ],
       'admin': [
         'view_sequence', 'view_techniques', 'view_teams', 'view_organization',
-        'manage_sequence', 'manage_teams', 'share_sequence', 'manage_organization'
+        'manage_sequence', 'manage_teams', 'share_sequence', 'manage_organization', 'manage_techniques'
       ],
       'super admin': [
         'view_sequence', 'manage_sequence', 'share_sequence',

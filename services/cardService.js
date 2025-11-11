@@ -121,6 +121,34 @@ class CardService {
     return { ...updatedCard, id };
   }
 
+  async patchCard(id, cardData, userId) {
+    const card = await this.getCard(id);
+
+    if (!card) {
+      throw new Error('Card not found');
+    }
+
+    if (card.card.user !== userId) {
+      throw new Error('Not authorized to update this card');
+    }
+
+    const allowedUpdates = {};
+    for (const key in cardData) {
+      if (key !== 'user' && key !== 'userName' && key !== 'createdAt') {
+        allowedUpdates[key] = cardData[key];
+      }
+    }
+
+    const updatedCard = {
+      ...card.card,
+      ...allowedUpdates,
+      updatedAt: new Date().toISOString()
+    };
+
+    await searchService.updateDocument(this.indexName, id, updatedCard);
+    return { ...updatedCard, id };
+  }
+
   async deleteCard(id, userId) {
     const card = await this.getCard(id);
     
@@ -198,7 +226,8 @@ class CardService {
     async getCardByUser(userId) {
      
     // const query = { term: { user: userId } };
-    const query = { match_all: {} };
+    // const query = { match_all: {} };
+     const query = { term: { user: userId } };
     const result = await searchService.findDocuments(this.indexName, query);
     return result.hits;
 }

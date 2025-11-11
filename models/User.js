@@ -50,6 +50,8 @@ class User {
     return result.rows[0] || null;
   }
 
+  
+
   static async updateUserWithOrganization(userId, organizationId, organizationName, roleId = null) {
     const query = `
       UPDATE users 
@@ -144,6 +146,16 @@ class User {
     });
 
     return permissions.map(p => p.name);
+  }
+   static async updateUserRole(userId, newRoleId) {
+    const query = `
+      UPDATE users
+      SET role_id = $1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING id, name, email, role_id;
+    `;
+    const result = await pool.query(query, [newRoleId, userId]);
+    return result.rows[0];
   }
 }
 

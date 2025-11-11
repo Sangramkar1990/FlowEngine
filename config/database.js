@@ -8,7 +8,7 @@ const nodeEnv = (process.env.NODE_ENV || '').trim();
 const pool = new Pool({
   user: 'postgres',
   host: nodeEnv === 'development' ? 'localhost' : 'postgres',
-  database: 'INSQV2',
+  database: nodeEnv === 'development' ? 'insqv2' :'INSQV2',
   password: nodeEnv === 'development' ? 'qwerty' :'InFiniteSQ',
   port: nodeEnv === 'development' ? 5433 : 5432,
   // port: 5432,
