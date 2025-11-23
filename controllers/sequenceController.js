@@ -369,6 +369,19 @@ exports.createCard = async (req, res) => {
     const { video, name, type, effect, description, sequence_id, difficulty } =
       req.body;
 
+      const userId = req.user.id;
+
+      const membership = await Membership.findByUserId(userId);
+
+      let organization_id = null;
+
+      if(membership && membership.length !== 0){
+        organization_id = membership[0].organization_id;
+      }
+
+      // return res.status(200).json({organization_id}) ;
+
+
     // Validate required fields
     if (!name || !type || !description) {
       return res.status(400).json({
@@ -385,6 +398,7 @@ exports.createCard = async (req, res) => {
         effect,
         description,
         sequence_id,
+        organization_id,
         difficulty,
       },
       req.user.id
@@ -535,14 +549,16 @@ exports.getUserSequencesAndShared = async (req, res) => {
     }
     // Sequences created by user
     const createdSequences = await sequenceService.getUserSequences(userId);
-    const createdFormatted = createdSequences.map((seq) => ({
+    let uniqueSequences = [];
+    if(createdSequences && createdSequences.length !==0){
+      const createdFormatted = createdSequences.map((seq) => ({
       ...seq,
       share: false,
     }));
 
     // Merge and deduplicate by sequence id
     const allSequences = [...createdFormatted, ...sharedSequences];
-    const uniqueSequences = [];
+    // const uniqueSequences = [];
     const seen = new Set();
     for (const seq of allSequences) {
       if (!seen.has(seq.id)) {
@@ -550,6 +566,9 @@ exports.getUserSequencesAndShared = async (req, res) => {
         seen.add(seq.id);
       }
     }
+
+    }
+    
 
     res.json(uniqueSequences);
   } catch (error) {

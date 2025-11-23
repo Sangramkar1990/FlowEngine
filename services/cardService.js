@@ -1,5 +1,6 @@
 const searchService = require('./searchService');
 const userService = require('./userService');
+const Membership = require('../models/Membership');
 const { createOpenSearchClient } = require('../config/opensearch');
 const { v4: uuidv4 } = require('uuid');
 const oneWeekAgoISO = require('../helper/dateHelper').oneWeekAgoISO;
@@ -20,6 +21,7 @@ class CardService {
         difficulty: { type: 'keyword' },
         effective: { type: 'text' },
         user: { type: 'keyword' },
+        organization_id : {type: 'keyword'},
         userName: { type: 'text' },
         sequence_id: { type: 'keyword' },
         createdAt: { type: 'date' }
@@ -90,6 +92,7 @@ class CardService {
       type: cardData.type,
       effect: cardData.effect,
       user: userId,
+      organization_id: cardData.organization_id || null,
       sequence_id: cardData.sequence_id || null,
       userName: cardData.userName || null,
       effective: cardData.effective || null,
@@ -224,11 +227,22 @@ class CardService {
     return result.hits;
   }
     async getCardByUser(userId) {
-     
-    // const query = { term: { user: userId } };
-    // const query = { match_all: {} };
+     let userMembership = await Membership.findByUserId(userId);
+    //  return userMembership; 
+    //  let organizationCards = [];
+     if(userMembership && userMembership.length !== 0){
+      let organizationId = userMembership[0].organization_id;
+      
+      // const query = { term: { organization_id: organizationId } };
+      const query = { match_all: {} };
+      const result = await searchService.findDocuments(this.indexName, query);
+      return result.hits;
+     }
      const query = { term: { user: userId } };
     const result = await searchService.findDocuments(this.indexName, query);
+    // const query = { term: { user: userId } };
+    // const query = { match_all: {} };
+     
     return result.hits;
 }
 
