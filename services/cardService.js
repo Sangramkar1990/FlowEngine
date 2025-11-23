@@ -233,8 +233,8 @@ class CardService {
      if(userMembership && userMembership.length !== 0){
       let organizationId = userMembership[0].organization_id;
       
-      // const query = { term: { organization_id: organizationId } };
-      const query = { match_all: {} };
+      const query = { term: { organization_id: organizationId } };
+      // const query = { match_all: {} };
       const result = await searchService.findDocuments(this.indexName, query);
       return result.hits;
      }

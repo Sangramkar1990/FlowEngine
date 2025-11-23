@@ -14,6 +14,7 @@ class SequenceService {
         name: { type: "text" },
         description: { type: "text" },
         user: { type: "keyword" },
+        organization_id: {type: "keyword"},
         userName: { type: "text" },
         createdAt: { type: "date" },
       },
@@ -99,7 +100,7 @@ class SequenceService {
     
   }
 
-  async createSequence(sequenceData, userId) {
+  async createSequence(sequenceData,organization_id, userId) {
     // console.log("test create sequence", userId);
 
     const user = await User.findById(userId);
@@ -112,6 +113,7 @@ class SequenceService {
       name: sequenceData.name,
       description: sequenceData.description,
       user: userId,
+      organization_id: organization_id,
       userName: user.name,
       createdAt: new Date().toISOString(),
     };
@@ -210,16 +212,22 @@ class SequenceService {
   }
 
 
-  async getFullSequences() {
+  async getFullSequences(orgId) {
 
-    const result = await searchService.findDocuments(
-      this.indexName,
-      { match_all: {} },
-      0,
-      1000, // A high limit to get all sequences
-      [{ createdAt: { order: "desc" } }]
-    );
+    
+
+
+    // const result = await searchService.findDocuments(
+    //   this.indexName,
+    //   { organization_id: orgId }, 
+    //   0,
+    //   1000, // A high limit to get all sequences
+    //   [{ createdAt: { order: "desc" } }]
+    // );
     // return result.hits;
+     const query = { term: { organization_id: orgId } };
+          // const query = { match_all: {} };
+    const result = await searchService.findDocuments(this.indexName, query);
 
     if (!Array.isArray(result.hits)) {
       throw new Error("Expected result.hits to be an array");

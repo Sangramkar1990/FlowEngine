@@ -41,7 +41,7 @@ router.get("/search", searchSequences);
 // User sequences route
 router.get("/user", verifyToken, getUserSequences);
 
-router.get("/full", getFullSequences);
+router.get("/full",verifyToken, getFullSequences);
 // Flow data routes
 router.route("/flows").post(protect, storeFlowData); // Use protect middleware if authentication is required
 
@@ -103,7 +103,7 @@ router.delete("/card/:id", verifyToken, deleteCard);
 router.get("/cards/user", verifyToken, getCardsByUser);
 
 // Add this route to fetch all cards
-router.get("/cards/all", getAllCards);
+router.get("/cards/all", verifyToken,  getAllCards);
 
 // Add this route to partially update a card
 router.patch("/card/:id", verifyToken, patchCard);

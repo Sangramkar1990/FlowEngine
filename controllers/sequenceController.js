@@ -103,8 +103,18 @@ exports.getSequenceTest = async (req, res) => {
 // @access  Private
 exports.createSequence = async (req, res) => {
   try {
+    const userId = req.user.id;
+
+    const membership = await Membership.findByUserId(userId);
+
+    let organization_id = null;
+
+    if (membership && membership.length !== 0) {
+      organization_id = membership[0].organization_id;
+    }
     const sequence = await sequenceService.createSequence(
       req.body,
+      organization_id,
       req.user.id
     );
 
@@ -136,9 +146,13 @@ exports.getSequences_old = async (req, res) => {
 
     // console.log("user:", {user: req.user.id});
 
-    const result = await sequenceService.getSequences(filters, page, limit, userId);
+    const result = await sequenceService.getSequences(
+      filters,
+      page,
+      limit,
+      userId
+    );
 
-    
     //  return res.status(200).json({user: result});
 
     res.status(200).json({
@@ -238,7 +252,7 @@ exports.deleteSequence = async (req, res) => {
 
     res.status(200).json({
       success: true,
-data: {},
+      data: {},
     });
   } catch (error) {
     if (error.message === "Sequence not found") {
@@ -369,18 +383,17 @@ exports.createCard = async (req, res) => {
     const { video, name, type, effect, description, sequence_id, difficulty } =
       req.body;
 
-      const userId = req.user.id;
+    const userId = req.user.id;
 
-      const membership = await Membership.findByUserId(userId);
+    const membership = await Membership.findByUserId(userId);
 
-      let organization_id = null;
+    let organization_id = null;
 
-      if(membership && membership.length !== 0){
-        organization_id = membership[0].organization_id;
-      }
+    if (membership && membership.length !== 0) {
+      organization_id = membership[0].organization_id;
+    }
 
-      // return res.status(200).json({organization_id}) ;
-
+    // return res.status(200).json({organization_id}) ;
 
     // Validate required fields
     if (!name || !type || !description) {
@@ -487,12 +500,10 @@ exports.deleteCard = async (req, res) => {
         .json({ success: false, message: "Card not found" });
     }
     if (error.message === "Not authorized to delete this card") {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Not authorized to delete this card",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized to delete this card",
+      });
     }
     res.status(400).json({ success: false, message: error.message });
   }
@@ -550,25 +561,23 @@ exports.getUserSequencesAndShared = async (req, res) => {
     // Sequences created by user
     const createdSequences = await sequenceService.getUserSequences(userId);
     let uniqueSequences = [];
-    if(createdSequences && createdSequences.length !==0){
+    if (createdSequences && createdSequences.length !== 0) {
       const createdFormatted = createdSequences.map((seq) => ({
-      ...seq,
-      share: false,
-    }));
+        ...seq,
+        share: false,
+      }));
 
-    // Merge and deduplicate by sequence id
-    const allSequences = [...createdFormatted, ...sharedSequences];
-    // const uniqueSequences = [];
-    const seen = new Set();
-    for (const seq of allSequences) {
-      if (!seen.has(seq.id)) {
-        uniqueSequences.push(seq);
-        seen.add(seq.id);
+      // Merge and deduplicate by sequence id
+      const allSequences = [...createdFormatted, ...sharedSequences];
+      // const uniqueSequences = [];
+      const seen = new Set();
+      for (const seq of allSequences) {
+        if (!seen.has(seq.id)) {
+          uniqueSequences.push(seq);
+          seen.add(seq.id);
+        }
       }
     }
-
-    }
-    
 
     res.json(uniqueSequences);
   } catch (error) {
@@ -581,7 +590,17 @@ exports.getUserSequencesAndShared = async (req, res) => {
 
 exports.getFullSequences = async (req, res) => {
   try {
-    const sequences = await sequenceService.getFullSequences();
+    const userId = req.user.id;
+
+    const membership = await Membership.findByUserId(userId);
+
+    let organization_id = null;
+
+    if (membership && membership.length !== 0) {
+      organization_id = membership[0].organization_id;
+    }
+
+    const sequences = await sequenceService.getFullSequences(organization_id);
     res.status(200).json({
       success: true,
       count: sequences.length,
@@ -720,13 +739,15 @@ exports.getAllCards = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 100;
 
-    const result = await cardService.getAllCards(page, limit);
+    const result = await cardService.getCardByUser(req.user.id);
+
+    // const result = await cardService.getAllCards(page, limit);
 
     res.status(200).json({
-      success: true,
-      count: result.cards.length,
-      pagination: result.pagination,
-      data: result.cards,
+      // success: true,
+      // count: result.cards.length,
+      // pagination: result.pagination,
+      data: result,
     });
   } catch (error) {
     res.status(500).json({
@@ -755,7 +776,6 @@ exports.patchCard = async (req, res) => {
     //   message: {userid :existingCard.card.user}
     // });
 
-
     if (!existingCard) {
       return res.status(404).json({
         success: false,
@@ -775,7 +795,7 @@ exports.patchCard = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: updatedCard
+      data: updatedCard,
     });
   } catch (error) {
     if (error.message === "Card not found") {
@@ -784,12 +804,10 @@ exports.patchCard = async (req, res) => {
         .json({ success: false, message: "Card not found" });
     }
     if (error.message === "Not authorized to update this card") {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Not authorized to update this card",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized to update this card",
+      });
     }
     res.status(400).json({ success: false, message: error.message });
   }
@@ -809,46 +827,69 @@ exports.getSequences = async (req, res) => {
     if (user) filters.user = user;
 
     // Get sequences created by the user (fetch all to combine before pagination)
-    const createdSequencesResult = await sequenceService.getSequences(filters, 1, 10000, userId); // Fetch a large number to get all
-    let allSequences = createdSequencesResult.sequences.map(seq => ({ ...seq, isShared: false }));
+    const createdSequencesResult = await sequenceService.getSequences(
+      filters,
+      1,
+      10000,
+      userId
+    ); // Fetch a large number to get all
+    let allSequences = createdSequencesResult.sequences.map((seq) => ({
+      ...seq,
+      isShared: false,
+    }));
 
     // Get memberships and teams for the user
-    const membershipsAndTeams = await Membership.findMembershipAndTeamByUserId(userId);
+    const membershipsAndTeams = await Membership.findMembershipAndTeamByUserId(
+      userId
+    );
 
     let sharedSequences = [];
     for (const membershipTeam of membershipsAndTeams) {
       const team_id = membershipTeam.team_id;
       const shares = await Share.findByTeamId(team_id);
       for (const share of shares) {
-        const sharedSequence = await sequenceService.getSequence(share.sequence_id);
+        const sharedSequence = await sequenceService.getSequence(
+          share.sequence_id
+        );
         if (sharedSequence) {
-          sharedSequences.push({ ...sharedSequence, isShared: true, sharedByTeam: team_id });
+          sharedSequences.push({
+            ...sharedSequence,
+            isShared: true,
+            sharedByTeam: team_id,
+          });
         }
       }
     }
 
     // Add organization-wide shared sequences
-    if (membershipsAndTeams.length > 0 && membershipsAndTeams[0].organization_id) {
+    if (
+      membershipsAndTeams.length > 0 &&
+      membershipsAndTeams[0].organization_id
+    ) {
       const organizationId = membershipsAndTeams[0].organization_id;
-      const orgShares = await Share.findByOrganizationIdAndEntireOrg(organizationId);
+      const orgShares = await Share.findByOrganizationIdAndEntireOrg(
+        organizationId
+      );
       for (const orgShare of orgShares) {
-        const sharedSequence = await sequenceService.getSequence(orgShare.sequence_id);
+        const sharedSequence = await sequenceService.getSequence(
+          orgShare.sequence_id
+        );
         if (sharedSequence) {
           sharedSequences.push({
             ...sharedSequence,
             isShared: true,
-            groupName: 'Organization Shared',
+            groupName: "Organization Shared",
             membership: membershipsAndTeams[0], // Associate with the first membership for context
           });
         }
       }
     }
-     allSequences = [...allSequences, ...sharedSequences];
+    allSequences = [...allSequences, ...sharedSequences];
 
     // Combine and deduplicate sequences
     const uniqueSequencesMap = new Map();
-    allSequences.forEach(seq => uniqueSequencesMap.set(seq.id, seq));
-    sharedSequences.forEach(seq => {
+    allSequences.forEach((seq) => uniqueSequencesMap.set(seq.id, seq));
+    sharedSequences.forEach((seq) => {
       if (!uniqueSequencesMap.has(seq.id)) {
         uniqueSequencesMap.set(seq.id, seq);
       }
@@ -871,7 +912,7 @@ exports.getSequences = async (req, res) => {
         pages: Math.ceil(total / limit),
       },
       data: paginatedSequences,
-      membership: membershipsAndTeams
+      membership: membershipsAndTeams,
     });
   } catch (error) {
     res.status(500).json({
