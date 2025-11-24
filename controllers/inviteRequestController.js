@@ -17,6 +17,29 @@ exports.createInviteRequest = async (req, res) => {
   }
 };
 
+// @desc    Check if user exists and has no membership
+// @route   GET /api/invite-requests/check-user
+// @access  Private
+exports.checkUserAndMembership = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findUserByEmailAndCheckMembership(email);
+
+    if (user) {
+      res.status(200).json({ success: true, data: user });
+    } else {
+      res.status(200).json({ success: false, message: 'User not found or already has a membership' });
+    }
+  } catch (error) {
+    console.error('Error checking user and membership:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // @desc    Update invite request status
 // @route   PUT /api/invite-requests/:id/status
 // @access  Private

@@ -107,3 +107,38 @@ exports.getAllMembershipByOrganization = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+// @desc    Create a new membership
+// @route   POST /api/memberships
+// @access  Private
+exports.createMembership = async (req, res) => {
+  try {
+    let { organizationId, userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+
+    if (!organizationId) {
+      const userMemberships = await Membership.findByUserId(req.user.id);
+      if (userMemberships && userMemberships.length > 0) {
+        organizationId = userMemberships[0].organization_id;
+      } else {
+        return res.status(400).json({ success: false, message: 'Organization ID not provided and could not be determined from user memberships.' });
+      }
+    }
+
+    const userRole = await Role.findByName('user', organizationId);
+
+    if (!userRole) {
+      return res.status(404).json({ success: false, message: 'User role not found for this organization' });
+    }
+
+    const newMembership = await Membership.create(userId, organizationId, userRole.id);
+
+    res.status(201).json({ success: true, data: newMembership });
+  } catch (error) {
+    console.error('Error creating membership:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

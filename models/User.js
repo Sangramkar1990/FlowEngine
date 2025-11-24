@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const Role = require('./Role');
 const RolePermission = require('./RolePermission');
 const Permission = require('./Permission');
+const Membership = require('./Membership');
 
 class User {
   static async create(userData) {
@@ -49,6 +50,8 @@ class User {
     const result = await pool.query(query, [email]);
     return result.rows[0] || null;
   }
+
+  
 
   
 
@@ -156,6 +159,20 @@ class User {
     `;
     const result = await pool.query(query, [newRoleId, userId]);
     return result.rows[0];
+  }
+
+  static async findUserByEmailAndCheckMembership(email) {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      return null; // User not found
+    }
+
+    const memberships = await Membership.findByUserId(user.id);
+    if (memberships && memberships.length > 0) {
+      return null; // User has existing memberships
+    }
+
+    return user; // User found, no existing memberships
   }
 }
 
