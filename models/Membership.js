@@ -3,14 +3,20 @@ const pool = require("../config/database");
 
 class Membership {
   static async create(userId, organizationId, role) {
+    console.log("Creating membership:", { userId, organizationId, role });
     const query = `
       INSERT INTO memberships (user_id, organization_id, role)
       VALUES ($1, $2, $3)
       RETURNING *
     `;
-    const result = await pool.query(query, [userId, organizationId, role]);
-    // console.log(result);
-    return result.rows[0];
+    try {
+      const result = await pool.query(query, [userId, organizationId, role]);
+      console.log('Created membership:', result.rows[0]);
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error creating membership:', error);
+      throw error; // Re-throw the error after logging it
+    }
   }
 
   static async findByUserId(userId) {
@@ -27,8 +33,10 @@ class Membership {
   }
 
   static async findByOrganizationId(organizationId) {
+    console.log("Finding memberships for organization ID:", organizationId);
     const query = "SELECT * FROM memberships WHERE organization_id = $1";
     const result = await pool.query(query, [organizationId]);
+    console.log("Found memberships:", result.rows);
     return result.rows;
   }
   static async findOtherMembersByOrganizationId(OrganizationId){
@@ -102,6 +110,16 @@ class Membership {
     `;
     const result = await pool.query(query, [userId]);
     return result.rows;
+  }
+   static async findById(membershipId) {
+    const query = `
+      SELECT m.*, o.name AS organization_name
+      FROM memberships m
+      LEFT JOIN organizations o ON m.organization_id = o.id
+      WHERE m.id = $1
+    `;
+    const result = await pool.query(query, [membershipId]);
+    return result.rows[0];
   }
 }
 

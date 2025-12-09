@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Membership = require('../models/Membership'); // Import Membership model
+const ErrorResponse = require('../utils/errorResponse');
 
-// Protect routes
 exports.protect = async (req, res, next) => {
   let token;
 
@@ -16,7 +17,7 @@ exports.protect = async (req, res, next) => {
 
   // Make sure token exists
   if (!token) {
-    return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
+    return next(new ErrorResponse('Not authorized to access this route', 401));
   }
 
   try {
@@ -26,12 +27,26 @@ exports.protect = async (req, res, next) => {
     const user = await User.findById(decoded.id);
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
+      return next(new ErrorResponse('Not authorized to access this route', 401));
     }
 
     req.user = user;
+    req.user.membershipId = decoded.membershipId; // Attach membershipId to req.user
+
+    // Fetch membership details and attach organization_id
+    if (decoded.membershipId) {
+      const membership = await Membership.findById(decoded.membershipId);
+      if (membership) {
+        req.membership = membership; // Attach full membership object
+        req.organizationId = membership.organization_id; // Attach organization_id directly
+      } else {
+        // Handle case where membership is not found (e.g., deleted)
+        return next(new ErrorResponse('Membership not found', 401));
+      }
+    }
+
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
+    return next(new ErrorResponse('Not authorized to access this route', 401));
   }
 };

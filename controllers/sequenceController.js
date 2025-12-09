@@ -593,6 +593,7 @@ exports.getFullSequences = async (req, res) => {
     const userId = req.user.id;
 
     const membership = await Membership.findByUserId(userId);
+    console.log("membership: admin test ---- >  ", membership);
 
     let organization_id = null;
 

@@ -10,7 +10,7 @@ const pool = new Pool({
   host: nodeEnv === 'development' ? 'localhost' : 'postgres',
   database: nodeEnv === 'development' ? 'insqv2' :'INSQV2',
   password: nodeEnv === 'development' ? 'qwerty' :'InFiniteSQ',
-  port: nodeEnv === 'development' ? 5432 : 5432,
+  port: nodeEnv === 'development' ? 5433 : 5432,
   // port: 5432,
 });
 

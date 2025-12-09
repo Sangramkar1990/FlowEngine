@@ -102,15 +102,15 @@ exports.register = async (req, res) => {
 
       console.log('all roles and permissions', {allPermissions, allOrgRoles, allRolePermissions, organizationRole, adminRole});
 
+      console.log("next step update user with org id and role id");
 
+      console.log("updating user with organization and admin role :", { userId: user.id, organizationId: organization.id, organizationName: organization.name, roleId: adminRole.id});
+      let updatedAdmin = await User.updateUserWithOrganization(user.id,organization.id, organization.name, adminRole.id);
+      console.log("creating membership user :", { userId: user.id, organizationId: organization.id, organizationName: organization.name, roleId: adminRole.id });
 
-
-      await User.updateUserWithOrganization(user.id, organization.id, organization.name, adminRole.id);
-      // await Membership.create({
-      //   organization_id: organization.id,
-      //   user_id: user.id,
-      //   role: 'admin',
-      // });
+      await Membership.create(user.id,organization.id, adminRole.id);
+      let testMembership = await Membership.findByOrganizationId(organization.id);
+      console.log("test membership after create :", { testMembership });
     }
 
     res.status(201).json({
@@ -137,37 +137,36 @@ exports.register = async (req, res) => {
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide an email and password",
-      });
+      return next(new ErrorResponse("Please provide an email and password", 400));
     }
 
     const user = await User.findByEmail(email);
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return next(new ErrorResponse("Invalid credentials", 401));
     }
 
     const isMatch = await User.matchPassword(password, user.password);
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return next(new ErrorResponse("Invalid credentials", 401));
     }
 
-    sendTokenResponse(user.id, 200, res);
+    // Fetch user's memberships
+    const memberships = await Membership.findByUserId(user.id);
+    let membershipId = null;
+    if (memberships && memberships.length > 0) {
+      // Assuming a user has one primary membership for the context of login
+      // You might need to adjust this logic if a user can have multiple active memberships
+      membershipId = memberships[0].id;
+    }
+
+    sendTokenResponse(user.id, membershipId, 200, res); // Pass membershipId
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
@@ -268,8 +267,8 @@ exports.logout = (req, res) => {
 };
 
 // Get token from model, create cookie and send response
-const sendTokenResponse = (userId, statusCode, res) => {
-  const token = User.getSignedJwtToken(userId);
+const sendTokenResponse = (userId, membershipId, statusCode, res) => { // Add membershipId
+  const token = User.getSignedJwtToken(userId, membershipId); // Pass membershipId
 
   const options = {
     expires: new Date(

@@ -56,6 +56,7 @@ class User {
   
 
   static async updateUserWithOrganization(userId, organizationId, organizationName, roleId = null) {
+    console.log("Updating user with organization:", { userId, organizationId, organizationName, roleId });
     const query = `
       UPDATE users 
       SET organization_id = $1, organization_name = $3, role_id = $4, updated_at = CURRENT_TIMESTAMP 
@@ -71,8 +72,8 @@ class User {
     return await bcrypt.compare(enteredPassword, hashedPassword);
   }
 
-  static getSignedJwtToken(userId) {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+  static getSignedJwtToken(userId, membershipId) {
+    return jwt.sign({ id: userId, membershipId }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE
     });
   }
