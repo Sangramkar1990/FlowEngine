@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "sangram.gaurav.kar@gmail.com",
   "license": "ISC",
-  "description": "Infinite sequence ",
+  "description": "Infinite sequence",
   "dependencies": {
     "@opensearch-project/opensearch": "^3.5.1",
     "bcryptjs": "^3.0.2",
@@ -24,6 +24,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
     "nodemailer": "^6.10.1",
     "pg": "^8.16.0",
     "razorpay": "^2.9.6",

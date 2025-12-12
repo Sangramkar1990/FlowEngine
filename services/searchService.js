@@ -275,6 +275,29 @@ console.log(JSON.stringify(mapping, null, 2));
       throw error;
     }
   }
+
+  /**
+   * Perform aggregations on documents.
+   * @param {string} indexName - Name of the index.
+   * @param {object} query - Query object to filter documents before aggregation.
+   * @param {object} aggregations - Aggregations object.
+   */
+  async aggregateDocuments(indexName, query = { match_all: {} }, aggregations) {
+    try {
+      const response = await this.client.search({
+        index: indexName,
+        body: {
+          size: 0, // We only want aggregations, not hits
+          query: query,
+          aggs: aggregations
+        }
+      });
+      return response.body;
+    } catch (error) {
+      console.error(`Error aggregating documents: ${error.message}`);
+      throw error;
+    }
+  }
 }
 
 module.exports = new SearchService();

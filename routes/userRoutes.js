@@ -6,6 +6,6 @@ const {getUserStatistics , getAllTechniqueBreakdown} = require('../controllers/u
 const router = express.Router();
 
 
-router.get('/statistics', verifyToken, getUserStatistics);
-router.get('/techniques/breakdown', verifyToken, getAllTechniqueBreakdown)
+router.get('/statistics', protect, getUserStatistics);
+router.get('/techniques/breakdown', protect, getAllTechniqueBreakdown)
 module.exports = router;

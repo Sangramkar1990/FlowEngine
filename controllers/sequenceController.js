@@ -382,21 +382,17 @@ exports.createCard = async (req, res) => {
   try {
     const { video, name, type, effect, description, sequence_id, difficulty } =
       req.body;
+      console.log("req.body:", req.user.membershipId);
 
     const userId = req.user.id;
+    const userMembershipId = req.user.membershipId;
 
-    const membership = await Membership.findByUserId(userId);
+    const membership = await Membership.findById(userMembershipId);
+    if(membership){
 
-    let organization_id = null;
-
-    if (membership && membership.length !== 0) {
-      organization_id = membership[0].organization_id;
-    }
-
-    // return res.status(200).json({organization_id}) ;
-
-    // Validate required fields
-    if (!name || !type || !description) {
+      console.log("membership found:", membership);
+       let organization_id = membership.organization_id;
+       if (!name || !type || !description) {
       return res.status(400).json({
         success: false,
         message: "Please provide name, type and description",
@@ -414,6 +410,7 @@ exports.createCard = async (req, res) => {
         organization_id,
         difficulty,
       },
+      organization_id,
       req.user.id
     );
 
@@ -421,6 +418,22 @@ exports.createCard = async (req, res) => {
       success: true,
       data: card,
     });
+
+
+    }
+
+   
+
+    // if (membership && membership.length !== 0) {
+    //   organization_id = membership[0].organization_id;
+    // }
+
+    // return res.status(200).json({organization_id}) ;
+
+    // Validate required fields
+    
+
+    
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -515,7 +528,7 @@ exports.deleteCard = async (req, res) => {
 exports.getCardsByUser = async (req, res) => {
   try {
     const userId = req.user.id; // Extract user ID from token
-    const cards = await cardService.getCardByUser(userId);
+    const cards = await cardService.getUserCards(userId);
     res.status(200).json({
       success: true,
       data: cards,
@@ -740,7 +753,7 @@ exports.getAllCards = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 100;
 
-    const result = await cardService.getCardByUser(req.user.id);
+    const result = await cardService.getUserCards(req.user.id);
 
     // const result = await cardService.getAllCards(page, limit);
 

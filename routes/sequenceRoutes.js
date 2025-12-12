@@ -88,7 +88,7 @@ router
   .delete(protect, deleteSequence);
 
 // Card creation route
-router.post("/create-card", verifyToken, createCard);
+router.post("/create-card", protect, createCard);
 
 // Card search route
 router.get("/search/cards", searchCards);
@@ -103,7 +103,7 @@ router.delete("/card/:id", verifyToken, deleteCard);
 router.get("/cards/user", verifyToken, getCardsByUser);
 
 // Add this route to fetch all cards
-router.get("/cards/all", verifyToken,  getAllCards);
+router.get("/cards/all", protect,  getAllCards);
 
 // Add this route to partially update a card
 router.patch("/card/:id", verifyToken, patchCard);

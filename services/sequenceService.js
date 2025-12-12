@@ -2,6 +2,7 @@ const searchService = require("./searchService");
 const userService = require("./userService");
 const cardService = require("./cardService");
 const User = require('../models/User.js');
+const moment = require('moment'); // Import moment for date calculations
 
 class SequenceService {
   constructor() {
@@ -277,6 +278,29 @@ class SequenceService {
     );
 
     return sequencesWithCards;
+  }
+
+  async getSequenceCounts(organization_id) {
+    // Total count of sequences for the organization
+    const totalSequencesQuery = { term: { organization_id: organization_id } };
+    const totalSequences = await searchService.countDocuments(this.indexName, totalSequencesQuery);
+
+    // Count of sequences added in the last week
+    const oneWeekAgo = moment().subtract(7, 'days').toISOString();
+    const lastWeekSequencesQuery = {
+      bool: {
+        must: [
+          { term: { organization_id: organization_id } },
+          { range: { createdAt: { gte: oneWeekAgo } } }
+        ]
+      }
+    };
+    const lastWeekSequences = await searchService.countDocuments(this.indexName, lastWeekSequencesQuery);
+
+    return {
+      totalSequences,
+      lastWeekSequences
+    };
   }
 
 
