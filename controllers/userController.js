@@ -10,9 +10,9 @@ exports.getUserStatistics = async (req, res) => {
 const userId = req.user.id; 
 const membershipId = req.user.membershipId;
 
-
+console.log("membershipId:", membershipId);
   const memberships = await Membership.findById(membershipId);
-  const organizationId = memberships.organization_id;
+  const organizationId = memberships?.organization_id;
   
   if(organizationId ){
     const sequencesCount = await sequenceService.getSequenceCounts(organizationId);
@@ -20,6 +20,12 @@ const membershipId = req.user.membershipId;
     return res.status(200).json({
         totalSequences: sequencesCount,
         totalCards: cardsCount
+    });
+  } else if(!membershipId) {
+    // Handle case where user is not a member of any organization
+    return res.status(200).json({
+      totalSequences: 0,
+      totalCards: 0
     });
   }
 
@@ -113,14 +119,16 @@ const membershipId = req.user.membershipId;
 exports.getAllTechniqueBreakdown = async (req, res) => {
   try {
     const membershipId = req.user.membershipId;
+    const userId = req.user.id;
+    console.log("membershipId:", membershipId);
     const memberships = await Membership.findById(membershipId);
-    const organizationId = memberships.organization_id;
+    const organizationId = memberships?.organization_id;
     console.log("org id:", organizationId);
-    if(organizationId){
-      const cards = await cardService.techniquebreakdown(organizationId);
+    // if(organizationId){
+      const cards = await cardService.techniquebreakdown(organizationId, userId);
        return res.status(200).json(cards);
       
-    }
+    // }
     
     
     // const typeCounts = cards.reduce((acc, card) => {

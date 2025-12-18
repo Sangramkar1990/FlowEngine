@@ -189,8 +189,8 @@ class CardService {
     return { total, addedLastWeek, techniques };
   }
 
-  async techniquebreakdown(organizationId) {
-    const baseQuery = organizationId ? { term: { organization_id: organizationId } } : { match_all: {} };
+  async techniquebreakdown(organizationId, userId) {
+    const baseQuery = organizationId ? { term: { organization_id: organizationId } } : { term: { user: userId } };
 
     const typeBreakdownAggregation = {
       "type_counts": {

@@ -317,7 +317,7 @@ CREATE TABLE IF NOT EXISTS memberships (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id),
   organization_id INTEGER REFERENCES organizations(id),
-  role VARCHAR(50) NOT NULL CHECK (role IN ('user', 'teamleader')),
+  role INTEGER REFERENCES roles(id),
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

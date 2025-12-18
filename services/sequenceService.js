@@ -213,7 +213,7 @@ class SequenceService {
   }
 
 
-  async getFullSequences(orgId) {
+  async getFullSequences(orgId, userId) {
 
     
 
@@ -226,7 +226,7 @@ class SequenceService {
     //   [{ createdAt: { order: "desc" } }]
     // );
     // return result.hits;
-     const query = { term: { organization_id: orgId } };
+     const query = orgId ?  { term: { organization_id: orgId } } : { term: { user: userId } } ;
           // const query = { match_all: {} };
     const result = await searchService.findDocuments(this.indexName, query);
 
@@ -280,17 +280,18 @@ class SequenceService {
     return sequencesWithCards;
   }
 
-  async getSequenceCounts(organization_id) {
+  async getSequenceCounts(organization_id, userId) {
     // Total count of sequences for the organization
-    const totalSequencesQuery = { term: { organization_id: organization_id } };
-    const totalSequences = await searchService.countDocuments(this.indexName, totalSequencesQuery);
+    const countSequencesQuery = organization_id ? { term: { organization_id: organization_id } } : { term: { user: userId } } ;
+    const totalSequences = await searchService.countDocuments(this.indexName, countSequencesQuery);
 
     // Count of sequences added in the last week
     const oneWeekAgo = moment().subtract(7, 'days').toISOString();
+    
     const lastWeekSequencesQuery = {
       bool: {
         must: [
-          { term: { organization_id: organization_id } },
+          countSequencesQuery,
           { range: { createdAt: { gte: oneWeekAgo } } }
         ]
       }
@@ -302,6 +303,30 @@ class SequenceService {
       lastWeekSequences
     };
   }
+
+  // async getSequenceCounts(organization_id) {
+  //   // Total count of sequences for the organization
+  //   const totalSequencesQuery = { term: { organization_id: organization_id } };
+  //   const totalSequences = await searchService.countDocuments(this.indexName, totalSequencesQuery);
+
+  //   // Count of sequences added in the last week
+  //   const oneWeekAgo = moment().subtract(7, 'days').toISOString();
+  //   const lastWeekSequencesQuery = {
+  //     bool: {
+  //       must: [
+  //         { term: { organization_id: organization_id } },
+  //         { range: { createdAt: { gte: oneWeekAgo } } }
+  //       ]
+  //     }
+  //   };
+  //   const lastWeekSequences = await searchService.countDocuments(this.indexName, lastWeekSequencesQuery);
+
+  //   return {
+  //     totalSequences,
+  //     lastWeekSequences
+  //   };
+  // }
+
 
 
 }

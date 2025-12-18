@@ -41,7 +41,7 @@ router.get("/search", searchSequences);
 // User sequences route
 router.get("/user", verifyToken, getUserSequences);
 
-router.get("/full",verifyToken, getFullSequences);
+router.get("/full",protect, getFullSequences);
 // Flow data routes
 router.route("/flows").post(protect, storeFlowData); // Use protect middleware if authentication is required
 

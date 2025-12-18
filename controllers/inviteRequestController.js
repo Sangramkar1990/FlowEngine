@@ -117,3 +117,39 @@ exports.getInviteRequestsByUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Join a user to an organization
+// @route   POST /api/invite-requests/join/:id
+// @access  Private
+exports.joinUserToOrganization = async (req, res) => {
+  try {
+    const { id: userId } = req.params; // User ID to be joined
+    const membershipId = req.user.membershipId; // Current user's membership ID
+
+    if (!membershipId) {
+      return res.status(400).json({ success: false, message: 'Current user does not have a membership.' });
+    }
+
+    // Get organization_id from the current user's membership
+    const currentMembership = await Membership.findById(membershipId);
+    if (!currentMembership) {
+      return res.status(404).json({ success: false, message: 'Current user\'s membership not found.' });
+    }
+
+    const organizationId = currentMembership.organization_id;
+
+    // Get the 'user' role for the organization
+    const userRole = await Role.findByName('user', organizationId);
+    if (!userRole) {
+      return res.status(404).json({ success: false, message: 'Default "user" role not found for this organization.' });
+    }
+
+    // Create a new membership for the target user
+    const newMembership = await Membership.create(userId, organizationId, userRole.id);
+
+    res.status(201).json({ success: true, data: newMembership });
+  } catch (error) {
+    console.error('Error joining user to organization:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

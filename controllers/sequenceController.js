@@ -107,6 +107,8 @@ exports.createSequence = async (req, res) => {
 
     const membership = await Membership.findByUserId(userId);
 
+    console.log("membership create sequence:", membership);
+
     let organization_id = null;
 
     if (membership && membership.length !== 0) {
@@ -604,17 +606,18 @@ exports.getUserSequencesAndShared = async (req, res) => {
 exports.getFullSequences = async (req, res) => {
   try {
     const userId = req.user.id;
+    const membershipId = req.user.membershipId;
 
-    const membership = await Membership.findByUserId(userId);
+    const membership = await Membership.findById(membershipId);
     console.log("membership: admin test ---- >  ", membership);
 
     let organization_id = null;
 
     if (membership && membership.length !== 0) {
-      organization_id = membership[0].organization_id;
+      organization_id = membership.organization_id;
     }
 
-    const sequences = await sequenceService.getFullSequences(organization_id);
+    const sequences = await sequenceService.getFullSequences(organization_id, userId);
     res.status(200).json({
       success: true,
       count: sequences.length,
