@@ -808,7 +808,7 @@ exports.patchCard = async (req, res) => {
       });
     }
 
-    const updatedCard = await cardService.patchCard(cardId, req.body, userId);
+    const updatedCard = await cardService.updateCard(cardId, req.body, userId);
 
     res.status(200).json({
       success: true,
