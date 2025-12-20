@@ -123,7 +123,7 @@ exports.getAllTechniqueBreakdown = async (req, res) => {
     console.log("membershipId:", membershipId);
     const memberships = await Membership.findById(membershipId);
     const organizationId = memberships?.organization_id;
-    console.log("org id:", organizationId);
+    console.log("org id $ user id:", organizationId, userId);
     // if(organizationId){
       const cards = await cardService.techniquebreakdown(organizationId, userId);
        return res.status(200).json(cards);

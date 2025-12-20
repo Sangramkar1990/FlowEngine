@@ -170,7 +170,7 @@ class CardService {
     const mostUsedTypeAggregation = {
       "most_used_type": {
         "terms": {
-          "field": "type",
+          "field": "type.keyword",
           "size": 1
         }
       }
@@ -195,7 +195,7 @@ class CardService {
     const typeBreakdownAggregation = {
       "type_counts": {
         "terms": {
-          "field": "type",
+          "field": "type.keyword",
           "size": 10000 // Get all unique types
         }
       }

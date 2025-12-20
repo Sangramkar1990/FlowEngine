@@ -92,11 +92,14 @@ exports.getAllMembershipByOrganization = async (req, res) => {
 
     const memberships = await Membership.findAllMembershipsWithUserData(organizationId);
     // return res.status(300).json({ success: true, data: memberships});
-    
+    console.log("memberships:", memberships);
     const roles = await Role.findAll(organizationId);
+    console.log("roles:", roles);
     const membershipsWithUsersAndRoles = await Promise.all(memberships.map(async (membership) => {
       const user = await User.findById(membership.user_id);
-      const role = roles.find(r => r.id === user.role_id);
+      console.log("user:", user);
+      const role = roles.find(r => r.id === membership.role);
+      console.log("filtered role:", role);
       return { ...membership, user: user ? { id: user.id, name: user.name, email: user.email, role: role ? { id: role.id, name: role.name } : null } : null };
     }));
 
