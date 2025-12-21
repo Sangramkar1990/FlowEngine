@@ -88,7 +88,7 @@ class CardService {
       user: userId,
       organization_id: organization_id,
       userName: user.name,
-      url: cardData.url,
+      url: cardData.video,
       createdAt: new Date().toISOString(),
     };
 
